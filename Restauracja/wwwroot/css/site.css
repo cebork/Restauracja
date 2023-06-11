@@ -1,0 +1,150 @@
+/*html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}*/
+
+
+body {
+    font-family: 'Courier New', monospace;
+    color: rgb(200, 200, 200);
+}
+
+.text-color {
+    color: rgb(200, 200, 200);
+}
+
+.active, .mask:hover {
+    background-color: rgba(251, 251, 251, 0.2)
+}
+
+footer {
+    /*position: fixed;*/
+    bottom: 0;
+    width: 100%;
+    color: rgb(200, 200, 200);
+    background-color: rgb(47, 49, 54);
+    font-family: 'Courier New', monospace;
+}
+
+nav {
+    font-family: 'Courier New', monospace;
+    background-color: rgb(32, 34, 37);
+}
+
+.welcom_on_page {
+    padding: 40px;
+    color: rgb(200, 200, 200);
+    font-family: 'Courier New', monospace;
+}
+
+.navi {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.admin_dishes {
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
+
+a {
+    text-decoration: none;
+    color: coral;
+}
+
+.add-button {
+    margin-bottom: 10px;
+}
+
+.mb-3 {
+    width: 20%;
+    margin: auto;
+}
+
+.avaliable_admin {
+    width: 20%;
+    margin: auto;
+}
+
+.admin_label {
+    color: rgb(200, 200, 200);
+}
+
+.error_admin {
+    color: red;
+}
+
+.details_dish {
+    color: white;
+    font-size: 24px;
+}
+
+.td_padding {
+    max-width: 500px;
+    padding-left: 40px;
+    padding-bottom: 5px;
+}
+
+.logedas {
+    padding-top: 9px;
+    float: right;
+}
+
+.login-segment {
+    margin: auto;
+    float: right;
+}
+
+.register-start-button {
+    float: right;
+    /*width: 20%;*/
+    /*margin: auto;*/
+    /*margin-bottom: 1%;*/
+}
+
+.dish-img-td {
+    width: 80%;
+}
+
+.dish-tr > td {
+    width: 100px;
+}
+
+.list_menu {
+    padding: 10px;
+}
+
+.cart_amount {
+    margin-left: auto;
+    width: 25%;
+    float: left;
+}
+
+.cart-tr > td {
+    width: 200px;
+}
+
+    .cart-tr > td:nth-child(4) {
+        width: 100px;
+    }
+
+.cart {
+    margin-left: auto;
+    margin-right: auto;
+    width: 60%;
+}

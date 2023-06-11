@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Wspaniała</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Restauracja.styles.css" asp-append-version="true" />
+</head>
+<body>
+@*    <nav th:fragment="navigation_fagment" class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand text-white" th:href="@{/}" th:text="#{navbar.name}"></a>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="naav nav-item mask navi">
+                        <a class="nav-link text-white" th:href="@{/zad3}" th:text="#{nav.dishList}"></a>
+                    </li>
+                    <li sec:authorize="isAuthenticated()" class="naav nav-item mask navi">
+                        <a class="nav-link text-white" aria-current="page" th:href="@{/orderListUser}" th:text="#{nav.orders}"></a>
+                    </li>
+                    <li sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')" class="naav nav-item mask navi">
+                        <a class="nav-link text-white" aria-current="page" th:href="@{/orderListAdmin}" th:text="#{nav.ordersAdmin}"></a>
+                    </li>
+
+                    <li sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')" class="naav nav-item mask navi">
+                        <a class="nav-link text-white" aria-current="page" th:href="@{/skladnikPage}" th:text="#{nav.skladaniki}"></a>
+                    </li>
+                    <li sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')" class="naav nav-item mask navi">
+                        <a class="nav-link text-white" aria-current="page" th:href="@{/kategoriePage}" th:text="#{nav.kategorie}"></a>
+                    </li>
+                    <li sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')" class="naav nav-item mask navi">
+                        <a class="nav-link text-white" aria-current="page" th:href="@{/showUsers}"th:text="#{nav.users}"></a>
+                    </li>
+                    <li sec:authorize="isAuthenticated()" class="naav nav-item mask navi">
+                        <a class="nav-link text-white" aria-current="page" th:href="@{/myProfile}" th:text="#{nav.my_profie}">JA</a>
+                    </li>
+                </ul>
+            </div>
+            <ul sec:authorize="isAnonymous()" class="navbar-nav me-auto mb-2 mb-lg-0 login-segment">
+                <li class="nav-item navi">
+                    <a th:href="@{/login}"><button type="button" class="btn btn-primary logedas" th:text="#{nav.login}"></button></a>
+                </li>
+                <li class="nav-item navi">
+                    <a href="/?lang=en">EN</a> | <a href="/?lang=pl">PL</a>
+                </li>
+            </ul>
+            <ul sec:authorize="isAuthenticated()" class="navbar-nav me-auto mb-2 mb-lg-0 login-segment">
+                <li class="naav nav-item mask navi">
+                    <a class="nav-link text-white" aria-current="page" th:href="@{/cart}" th:text="#{nav.cart}"></a>
+                </li>
+                <li class="text-white nav-item navi logedas">
+                    <span th:text="#{nav.loggedAs}"></span><b><span sec:authentication="name"/></b>
+                </li>
+                <li class="nav-item navi">
+                    <form th:action="@{/logout}" id="logout" th:method="post">
+                        <button type="submit" class="btn btn-primary logedas" th:text="#{nav.logout}"></button>
+                    </form>
+                </li>
+                <li class="nav-item navi">
+                    <a href="/?lang=en">EN</a> | <a href="/?lang=pl">PL</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+*@
+
+
+
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Restauracja</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+
+
+    <footer th:fragment="footer_fagment" class="text-center footer">
+        <div class="text-center p-3">
+            © 2023 Copyright:
+            <span>Cezary Borkowski</span>
+        </div>
+    </footer>
+
+
+
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
