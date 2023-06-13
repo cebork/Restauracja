@@ -9,66 +9,66 @@
     <link rel="stylesheet" href="~/Restauracja.styles.css" asp-append-version="true" />
 </head>
 <body>
-@*    <nav th:fragment="navigation_fagment" class="navbar navbar-expand-lg navbar-light">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container-fluid">
-            <a class="navbar-brand text-white" th:href="@{/}" th:text="#{navbar.name}"></a>
+            <a class="navbar-brand text-white" asp-area="" asp-controller="Home" asp-action="Index">Wspaniała restauracja</a>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="naav nav-item mask navi">
-                        <a class="nav-link text-white" th:href="@{/zad3}" th:text="#{nav.dishList}"></a>
+                        <a class="nav-link text-white" asp-area="" asp-controller="Dishes" asp-action="Index">Lista dań</a>
                     </li>
-                    <li sec:authorize="isAuthenticated()" class="naav nav-item mask navi">
-                        <a class="nav-link text-white" aria-current="page" th:href="@{/orderListUser}" th:text="#{nav.orders}"></a>
+                    <li class="naav nav-item mask navi">
+                        <a class="nav-link text-white" aria-current="page" >Zamówienia</a>
                     </li>
-                    <li sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')" class="naav nav-item mask navi">
-                        <a class="nav-link text-white" aria-current="page" th:href="@{/orderListAdmin}" th:text="#{nav.ordersAdmin}"></a>
+                    <li class="naav nav-item mask navi">
+                        <a class="nav-link text-white" aria-current="page" >Zamówienia - admin</a>
                     </li>
 
-                    <li sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')" class="naav nav-item mask navi">
-                        <a class="nav-link text-white" aria-current="page" th:href="@{/skladnikPage}" th:text="#{nav.skladaniki}"></a>
+                    <li class="naav nav-item mask navi">
+                        <a class="nav-link text-white" aria-current="page" >Składniki</a>
                     </li>
-                    <li sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')" class="naav nav-item mask navi">
-                        <a class="nav-link text-white" aria-current="page" th:href="@{/kategoriePage}" th:text="#{nav.kategorie}"></a>
+                    <li class="naav nav-item mask navi">
+                        <a class="nav-link text-white" aria-current="page" asp-area="" asp-controller="Categories" asp-action="Index">Kategorie</a>
                     </li>
-                    <li sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')" class="naav nav-item mask navi">
-                        <a class="nav-link text-white" aria-current="page" th:href="@{/showUsers}"th:text="#{nav.users}"></a>
+                    <li class="naav nav-item mask navi">
+                        <a class="nav-link text-white" aria-current="page" >Użytkownicy</a>
                     </li>
-                    <li sec:authorize="isAuthenticated()" class="naav nav-item mask navi">
-                        <a class="nav-link text-white" aria-current="page" th:href="@{/myProfile}" th:text="#{nav.my_profie}">JA</a>
+                    <li class="naav nav-item mask navi">
+                        <a class="nav-link text-white" aria-current="page" >JA</a>
                     </li>
                 </ul>
             </div>
-            <ul sec:authorize="isAnonymous()" class="navbar-nav me-auto mb-2 mb-lg-0 login-segment">
+            @*<ul class="navbar-nav me-auto mb-2 mb-lg-0 login-segment">
                 <li class="nav-item navi">
-                    <a th:href="@{/login}"><button type="button" class="btn btn-primary logedas" th:text="#{nav.login}"></button></a>
+                    <a><button type="button" class="btn btn-primary logedas">Zaloguj się</button></a>
                 </li>
                 <li class="nav-item navi">
-                    <a href="/?lang=en">EN</a> | <a href="/?lang=pl">PL</a>
+                    <a>EN</a> | <a>PL</a>
                 </li>
             </ul>
-            <ul sec:authorize="isAuthenticated()" class="navbar-nav me-auto mb-2 mb-lg-0 login-segment">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 login-segment">
                 <li class="naav nav-item mask navi">
-                    <a class="nav-link text-white" aria-current="page" th:href="@{/cart}" th:text="#{nav.cart}"></a>
+                    <a class="nav-link text-white" aria-current="page" >Koszyk</a>
                 </li>
                 <li class="text-white nav-item navi logedas">
-                    <span th:text="#{nav.loggedAs}"></span><b><span sec:authentication="name"/></b>
+                    <span>Jesteś zalogowany jako </span><b><span/></b>
                 </li>
                 <li class="nav-item navi">
-                    <form th:action="@{/logout}" id="logout" th:method="post">
-                        <button type="submit" class="btn btn-primary logedas" th:text="#{nav.logout}"></button>
+                    <form id="logout" th:method="post">
+                        <button type="submit" class="btn btn-primary logedas" >Wyloguj się</button>
                     </form>
                 </li>
                 <li class="nav-item navi">
-                    <a href="/?lang=en">EN</a> | <a href="/?lang=pl">PL</a>
+                    <a>EN</a> | <a>PL</a>
                 </li>
-            </ul>
+            </ul>*@
         </div>
     </nav>
-*@
 
 
 
-    <header>
+
+@*    <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Restauracja</a>
@@ -88,19 +88,16 @@
                 </div>
             </div>
         </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+    </header>*@
+    <article>
+        @RenderBody()
+    </article>
 
 
-
-    <footer th:fragment="footer_fagment" class="text-center footer">
-        <div class="text-center p-3">
+    <footer class="text-center">
+        <div class="text-center footer-content">
             © 2023 Copyright:
-            <span>Cezary Borkowski</span>
+            <span> Cezary Borkowski</span>
         </div>
     </footer>
 

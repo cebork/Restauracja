@@ -1,0 +1,201 @@
+﻿@*@model IEnumerable<Restauracja.Models.Dish>*@
+@model Restauracja.ViewModels.PaginationViewModel<Restauracja.Models.Dish>
+@{
+    ViewData["Title"] = "Lista dań";
+}
+
+@*<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreationDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsAvaliable)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Image)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreationDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Price)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsAvaliable)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Image)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.DishID">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.DishID">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.DishID">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>*@
+
+
+<section>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="d-flex justify-content-center">
+                <h1 class="welcom_on_page">Lista dań</h1>
+            </div>
+        </div>
+       @* <form class="text-color" method="GET">
+            <div class="mb-3">
+                <label class="form-label admin_label" th:text="#{dishList.phrase}"></label>
+                <input class="form-control" type="text" name="phrase"/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label admin_label" th:text="#{dishList.minPrice}"></label>
+                <input class="form-control" type="number" name="min_price"/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label admin_label" th:text="#{dishList.maxPrice}"></label>
+                <input  class="form-control" type="number" name="max_price"/>
+            </div>
+            <div sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')" class="mb-3">
+                <label class="form-label admin_label" th:text="#{dishList.category}">Kategoria</label>
+                <select class="form-select" name="kategoria">
+                    <option value="-1" disabled>Wybierz kategorię</option>
+                    <option value="0">Wszystkie</option>
+                    <option th:each="kat : ${kategoria2}" th:value="${kat.id}" th:text="${kat.name}"/>
+                </select>
+            </div>
+            <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-success add-button" th:text="#{dishList.filterSearch}"></button>
+            </div>
+        </form>*@
+        <div class="row">
+            <div class="d-flex justify-content-center">
+                <a asp-action="Create"><button type="button" class="btn btn-success add-button">Dodaj</button></a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="d-flex justify-content-center admin_dishes">
+                <table class="table table-striped table-dark">
+                    <thead>
+                        <tr>
+                            <th>Zdjęcie</th>
+                            <th>Nazwa</th>
+                            <th>Cena</th>
+                            <th>Akcja</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items) {
+                            <tr class="dish-tr">
+                                <td class="dish-img-td">
+                                    @if (!string.IsNullOrEmpty(item.Image))
+                                    {
+                                        <img class="dish-img-td" src="data:image;base64,@Html.DisplayFor(modelItem => item.Image)" alt="@Html.DisplayFor(modelItem => item.Name)" />
+                                    }
+                                    else
+                                    {
+                                        <img class="dish-img-td" src="~/static/Images/placeholder.jpg" alt="Brak zdjęcia" />
+                                    }
+
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Name)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Price)
+                                </td>
+                                
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@item.DishID">Edycja</a> |
+                                    <a asp-action="Details" asp-route-id="@item.DishID">Szczegóły</a> |
+                                    <a asp-action="Delete" asp-route-id="@item.DishID">Usuń</a>
+                                </td>
+                            </tr>
+                        }
+                        @*<span th:each="zam : ${lista}">
+                            <tr class="dish-tr">
+                                <td>
+                                    <img th:if="${zam.image} == null" class="dish-img-td" src="/images/placeholder.jpg"/>
+                                    <img th:if="${zam.image} != null" class="dish-img-td" th:src="'data:image/*;base64,' + ${zam.image}"/>
+                                </td>
+                                <td th:text="${zam.nazwa}"></td>
+                                <td th:text="${#numbers.formatDecimal(zam.cena, 2, 2, 'COMMA')} + ' PLN'"></td>
+                                <td>
+                                    <div class="d-flex justify-content-center">
+                                        <a class="list_menu" sec:authorize="hasAnyRole('USER', 'SUPER_ADMIN')" th:href="@{/details?id=} + ${zam.Id}" th:text="#{dishList.details}"></a>
+                                        <a class="list_menu" sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')" th:href="@{/edit?id=} + ${zam.Id}" th:text="#{dishList.edit}"></a>
+                                        <a class="list_menu" sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')" th:href="@{/delete?id=} + ${zam.Id}" th:text="#{dishList.delete}"></a>
+                                    </div>
+                                    @*<div  sec:authorize="hasAnyRole('USER', 'ADMIN', 'SUPER_ADMIN')" class="d-flex justify-content-center">
+                                        <form th:if="${zam.dostepne} == true" method="GET" th:action="@{/addToCart}">
+                                            <input type="hidden" name="id" th:value="${zam.Id}"/>
+                                            <input min="1" class="form-control cart_amount" type="number" name="ilosc" value="1"/>
+                                            <button class="btn btn-success add-button" type="submit" th:text="#{dishList.YesAvaliable}"></button>
+                                        </form>
+                                        <h3 th:if="${zam.dostepne} == false" th:text="#{dishList.NoAvaliable}"></h3>
+                                    </div>
+                                </td>
+                            </tr>
+                        </span>*@
+                    </tbody>
+                </table>
+                
+                @*<div class="text-white" th:if="${#lists.isEmpty(lista)}"><h2>Lista jest pusta</h2></div>*@
+            </div>
+        </div>
+        <div class="row">
+            <div>
+                <div class="d-flex justify-content-center admin_dishes">
+                    <p>
+                        Obecna strona: @Model.CurrentPage
+                        <br />
+                    
+                        <a href="@Url.Action("Index", new { page = 0 })">
+                            <button class="btn btn-primary"><<</button>
+                        </a>
+                        <a href="@Url.Action("Index", new { page = Model.CurrentPage - 1 })">
+                            <button class="btn btn-primary"><</button>
+                        </a>
+                        <button class="btn btn-primary" disabled>@Model.CurrentPage</button>
+                        <a href="@Url.Action("Index", new { page = Model.CurrentPage + 1 })">
+                            <button class="btn btn-primary">></button>
+                        </a>
+                        <a href="@Url.Action("Index", new { page = Model.TotalPages })">
+                            <button class="btn btn-primary">>></button>
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@*<a th:href="@{/add}">Dodaj</a>
+<div th:if="${#lists.isEmpty(lista)}">Lista jest pusta</div>
+</body>*@

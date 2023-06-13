@@ -1,3 +1,6 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Restauracja.Data;
 namespace Restauracja
 {
     public class Program
@@ -5,6 +8,8 @@ namespace Restauracja
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddDbContext<RestauracjaContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("RestauracjaContext") ?? throw new InvalidOperationException("Connection string 'RestauracjaContext' not found.")));
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();

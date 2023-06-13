@@ -18,9 +18,15 @@ body {
 }*/
 
 
-body {
+html, body {
     font-family: 'Courier New', monospace;
     color: rgb(200, 200, 200);
+    background-color: rgb(54, 57, 63);
+    height: 100%;
+}
+
+article {
+    min-height: calc(100% - 100px)
 }
 
 .text-color {
@@ -32,12 +38,21 @@ body {
 }
 
 footer {
-    /*position: fixed;*/
+    position: sticky;
     bottom: 0;
+    height: 50px;
+    text-align: center;
     width: 100%;
     color: rgb(200, 200, 200);
     background-color: rgb(47, 49, 54);
     font-family: 'Courier New', monospace;
+}
+
+.footer-content {
+    padding-top: 1.25%;
+    display: flex;
+    align-items: center; 
+    justify-content: center;
 }
 
 nav {
@@ -72,7 +87,7 @@ a {
 }
 
 .mb-3 {
-    width: 20%;
+    width: 30%;
     margin: auto;
 }
 
