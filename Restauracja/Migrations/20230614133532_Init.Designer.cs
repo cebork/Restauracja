@@ -12,8 +12,8 @@ using Restauracja.Data;
 namespace Restauracja.Migrations
 {
     [DbContext(typeof(RestauracjaContext))]
-    [Migration("20230611195426_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20230614133532_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,21 @@ namespace Restauracja.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("DishIngredient", b =>
+                {
+                    b.Property<long>("DishesDishID")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("IngredientsIngredientID")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("DishesDishID", "IngredientsIngredientID");
+
+                    b.HasIndex("IngredientsIngredientID");
+
+                    b.ToTable("DishIngredient");
+                });
 
             modelBuilder.Entity("Restauracja.Models.Category", b =>
                 {
@@ -49,10 +64,7 @@ namespace Restauracja.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("DishID"));
 
-                    b.Property<long>("CategoryID")
-                        .HasColumnType("bigint");
-
-                    b.Property<int?>("CategoryID1")
+                    b.Property<int?>("CategoryID")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreationDate")
@@ -75,16 +87,47 @@ namespace Restauracja.Migrations
 
                     b.HasKey("DishID");
 
-                    b.HasIndex("CategoryID1");
+                    b.HasIndex("CategoryID");
 
                     b.ToTable("Dish");
+                });
+
+            modelBuilder.Entity("Restauracja.Models.Ingredient", b =>
+                {
+                    b.Property<long>("IngredientID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("IngredientID"));
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IngredientID");
+
+                    b.ToTable("Ingredient");
+                });
+
+            modelBuilder.Entity("DishIngredient", b =>
+                {
+                    b.HasOne("Restauracja.Models.Dish", null)
+                        .WithMany()
+                        .HasForeignKey("DishesDishID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Restauracja.Models.Ingredient", null)
+                        .WithMany()
+                        .HasForeignKey("IngredientsIngredientID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Restauracja.Models.Dish", b =>
                 {
                     b.HasOne("Restauracja.Models.Category", "Category")
                         .WithMany("Dishes")
-                        .HasForeignKey("CategoryID1");
+                        .HasForeignKey("CategoryID");
 
                     b.Navigation("Category");
                 });

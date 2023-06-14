@@ -67,6 +67,9 @@ namespace Restauracja.Controllers
             }
 
             var dish = await _context.Dish
+                .Include(d => d.Category)
+                .Include(i => i.Ingredients)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.DishID == id);
             if (dish == null)
             {
@@ -77,9 +80,24 @@ namespace Restauracja.Controllers
         }
 
         // GET: Dishes/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return View();
+            CreateDishViewModel createDishViewModel = new CreateDishViewModel();
+            createDishViewModel.CategoryViewModel = new CategoryViewModel
+            {
+                Categories = await _context.Category.Select(cast => new SelectListItem
+                {
+                    Value = cast.CategoryID.ToString(),
+                    Text = cast.Name
+                }).ToListAsync()
+            };
+            createDishViewModel.IngredientViewModel = _context.Ingredient.Select(i => new IngredientViewModel
+            {
+                IngredientID = i.IngredientID,
+                Name = i.Name,
+                IsSelected = false
+            });
+            return View(createDishViewModel);
         }
 
         // POST: Dishes/Create
@@ -87,8 +105,20 @@ namespace Restauracja.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("DishID,Name,Description,CreationDate,Price,IsAvaliable,Image")] Dish dish, IFormFile? imageFile)
+        public async Task<IActionResult> Create([Bind("DishID,Name,Description,CreationDate,Price,IsAvaliable,Image")] Dish dish, IFormFile? imageFile, int category, List<long> selectedIngredients)
         {
+
+            if (selectedIngredients != null)
+            {
+                var ingredients = _context.Ingredient
+                    .Where(i => selectedIngredients.Contains(i.IngredientID))
+                    .ToListAsync();
+                dish.Ingredients = ingredients.Result;
+            }
+            if (category != null)
+            {
+                dish.Category = _context.Category.ToListAsync().Result.Where(el => el.CategoryID == category).ToList()[0];
+            }
             if (imageFile != null && imageFile.Length > 0)
             {
                 using var memoryStream = new MemoryStream();
@@ -98,8 +128,7 @@ namespace Restauracja.Controllers
             }
             else
             {
-                dish.Image = null;
-            }
+                dish.Image = null;            }
             if (ModelState.IsValid)
             {
                 _context.Add(dish);
@@ -117,12 +146,33 @@ namespace Restauracja.Controllers
                 return NotFound();
             }
 
-            var dish = await _context.Dish.FindAsync(id);
+
+            var dish = await _context.Dish
+                .Include(d => d.Category)
+                .Include(i => i.Ingredients)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.DishID == id);
             if (dish == null)
             {
                 return NotFound();
             }
-            return View(dish);
+            CreateDishViewModel createDishViewModel = new CreateDishViewModel();
+            createDishViewModel.Dish = dish;
+            createDishViewModel.CategoryViewModel = new CategoryViewModel
+            {
+                Categories = await _context.Category.Select(cast => new SelectListItem
+                {
+                    Value = cast.CategoryID.ToString(),
+                    Text = cast.Name
+                }).ToListAsync()
+            };
+            createDishViewModel.IngredientViewModel = _context.Ingredient.Select(i => new IngredientViewModel
+            {
+                IngredientID = i.IngredientID,
+                Name = i.Name,
+                IsSelected = dish.Ingredients.Contains(i) ? true : false
+            });
+            return View(createDishViewModel);
         }
 
         // POST: Dishes/Edit/5
@@ -130,31 +180,31 @@ namespace Restauracja.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("DishID,Name,Description,CreationDate,Price,IsAvaliable,Image")] Dish dish)
+        public async Task<IActionResult> Edit([Bind("DishID,Name,Description,CreationDate,Price,IsAvaliable,Image")] Dish dish, IFormFile? imageFile, int category, List<long> selectedIngredients)
         {
-            if (id != dish.DishID)
-            {
-                return NotFound();
-            }
 
+            if (selectedIngredients != null)
+            {
+                var ingredients = _context.Ingredient
+                    .Where(i => selectedIngredients.Contains(i.IngredientID))
+                    .ToListAsync();
+                dish.Ingredients = ingredients.Result;
+            }
+            if (category != null)
+            {
+                dish.Category = _context.Category.ToListAsync().Result.Where(el => el.CategoryID == category).ToList()[0];
+            }
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                using var memoryStream = new MemoryStream();
+                await imageFile.CopyToAsync(memoryStream);
+                byte[] data = memoryStream.ToArray();
+                dish.Image = Convert.ToBase64String(data);
+            }
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(dish);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!DishExists(dish.DishID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                _context.Add(dish);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(dish);

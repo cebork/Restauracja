@@ -17,5 +17,6 @@ namespace Restauracja.Data
         public DbSet<Restauracja.Models.Category> Category { get; set; } = default!;
 
         public DbSet<Restauracja.Models.Dish>? Dish { get; set; }
+        public DbSet<Restauracja.Models.Ingredient> Ingredient { get; set; }
     }
 }

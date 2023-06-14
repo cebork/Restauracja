@@ -1,59 +1,120 @@
-﻿@model Restauracja.Models.Dish
-
+﻿@model Restauracja.ViewModels.CreateDishViewModel
 @{
     ViewData["Title"] = "Lista dań";
 }
+<br />
 
-<h1>Edit</h1>
-
-<h4>Dish</h4>
+<h2 class="admin_label mb-3">Edycja potrawy</h2>
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="DishID" />
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CreationDate" class="control-label"></label>
-                <input asp-for="CreationDate" class="form-control" />
-                <span asp-validation-for="CreationDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Price" class="control-label"></label>
-                <input asp-for="Price" class="form-control" />
-                <span asp-validation-for="Price" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsAvaliable" /> @Html.DisplayNameFor(model => model.IsAvaliable)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="Image" class="control-label"></label>
-                <input asp-for="Image" class="form-control" />
-                <span asp-validation-for="Image" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
+<div class="mb-3">
+    @if (!string.IsNullOrEmpty(Model.Dish.Image))
+    {
 
-<div>
-    <a asp-action="Index">Back to List</a>
+        <img class="img-thumbnail" src="data:image;base64,@Html.DisplayFor(modelItem => Model.Dish.Image)" alt="@Html.DisplayFor(modelItem => Model.Dish.Name)" />
+    }
+    else
+    {
+        <img class="img-thumbnail" class="dish-img-td" src="~/static/Images/placeholder.jpg" alt="Brak zdjęcia" />
+    }
+</div>
+<form asp-action="Edit" enctype="multipart/form-data" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-3">
+        <label class="form-label admin_label">Nazwa</label>
+        <input asp-for="Dish.Name" class="form-control" />
+        <span asp-validation-for="Dish.Name" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label admin_label">Opis</label>
+        <textarea asp-for="Dish.Description" class="form-control"></textarea>
+        <span asp-validation-for="Dish.Description" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label admin_label">Data</label>
+        <input asp-for="Dish.CreationDate" class="form-control"></input>
+        <span asp-validation-for="Dish.CreationDate" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label admin_label">Cena</label>
+        <input asp-for="Dish.Price" class="form-control" />
+        <span asp-validation-for="Dish.Price" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label for="formFile" class="form-label admin_label">Zdjęcie</label>
+        <input class="form-control" type="file" id="formFile" name="imageFile" accept="image/*">
+    </div>
+    <div class="mb-3 admin_label">
+        <label class="form-check-label">Czy dostępne?</label>
+        <input class="form-check-input" asp-for="Dish.IsAvaliable" />
+    </div>
+    <div class="mb-3 admin_label">
+        <label class="form-check-label">Kategoria</label>
+        <select name="category" class="form-select" asp-for="Dish.Category" asp-items="Model.CategoryViewModel.Categories">
+            <option value="" disabled>Wybierz opcje</option>
+            @foreach (var category in Model.CategoryViewModel.Categories)
+            {
+                if (Model.Dish.Category.CategoryID.ToString() == category.Value)
+                {
+                    <option value="@category.Value" selected>@category.Text</option>
+                }
+                else
+                {
+                    <option value="@category.Value">@category.Text</option>
+                }    
+            }
+        </select>
+    </div>
+    <div class="mb-3 admin_label">
+        <label class="form-check-label">Składniki</label><br />
+        @foreach (var ingredient in Model.IngredientViewModel)
+        {
+            if (ingredient.IsSelected )
+            {
+                <input class="form-check-input" type="checkbox" id="ingredient_@ingredient.IngredientID" name="selectedIngredients" value="@ingredient.IngredientID" checked/>
+            }
+            else
+            {
+                <input class="form-check-input" type="checkbox" id="ingredient_@ingredient.IngredientID" name="selectedIngredients" value="@ingredient.IngredientID" />
+            }
+
+            <label for="ingredient_@ingredient.IngredientID">@ingredient.Name</label>
+        }
+    </div>
+    }
+
+
+
+    @*<div>
+    <div class="mb-3 admin_label" th:text="#{potrawa.kategoria}">
+    </div>
+    <select class="form-select mb-3" th:field="*{kategoria.id}">
+    <option value="-1" disabled>Wybierz kategorię</option>
+    <option th:each="kat : ${kategoria2}" th:value="${kat.id}" th:text="${kat.name}"/>
+    </select>
+    <div class="error_admin" th:if="${#fields.hasErrors('kategoria')}" th:each="err :${#fields.errors('kategoria')}" th:text="${err}"></div>
+    </div>
+    <div>
+    <div class="mb-3 admin_label" th:text="#{potrawa.skladniki}">
+    </div>
+    <div th:each="skladniki : ${skladniki}" class="form-check mb-3 admin_label">
+    <input class="form-check-input" type="checkbox" th:value="${skladniki.id}" th:field="*{skladniki}" id="flexCheckDefault">
+    <label class="form-check-label" th:for="${skladniki}" th:text="${skladniki.name}">
+    Default checkbox
+    </label>
+    </div>
+    <div class="mb-3 error_admin" th:if="${#fields.hasErrors('skladniki')}" th:each="err :${#fields.errors('skladniki')}" th:text="${err}"></div>
+    </div>
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />*@
+    <div class="mb-3">
+        <input type="submit" value="Zapisz" class="btn btn-success" />
+    </div>
+</form>
+<div class="mb-3">
+    <a asp-action="Index"><button class="btn btn-primary">Wróć do listy</button></a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

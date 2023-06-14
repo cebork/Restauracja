@@ -24,4 +24,8 @@
     <None Include="wwwroot\static\Images\placeholder.jpg" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Restauracja.Data;
+using Restauracja.DBSeeding;
+using Restauracja.Models;
+
 namespace Restauracja
 {
     public class Program
@@ -15,6 +18,14 @@ namespace Restauracja
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+
+                CategorySeeding.Initialize(services);
+                IngredientSeeding.Initialize(services);
+            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())

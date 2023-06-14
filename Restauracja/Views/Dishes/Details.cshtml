@@ -4,51 +4,96 @@
     ViewData["Title"] = "Lista dań";
 }
 
-<h1>Details</h1>
 
-<div>
-    <h4>Dish</h4>
+
+
+<div class="container-fluid">
+    <div class="row d-flex justify-content-center">
+        <div class="d-flex justify-content-center">
+            <h1>Szczegóły</h1>
+        </div>
+        <div class="d-flex justify-content-center">
+            <h4>Potrawa</h4>
+        </div>
+    </div>
     <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreationDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreationDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Price)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Price)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsAvaliable)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsAvaliable)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Image)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Image)
-        </dd>
-    </dl>
+    <div class="row">
+        <div class="d-flex justify-content-center">
+            <button onclick="history.go(-1);" type="button" class="btn btn-success add-button">Wróć</button>
+        </div>
+    </div>
+    <div class="mb-3">
+        @if (!string.IsNullOrEmpty(Model.Image))
+        {
+            <img class="img-thumbnail" src="data:image;base64,@Html.DisplayFor(modelItem => Model.Image)" alt="@Html.DisplayFor(modelItem => Model.Name)" />
+        }
+        else
+        {
+            <img class="img-thumbnail" class="dish-img-td" src="~/static/Images/placeholder.jpg" alt="Brak zdjęcia" />
+        }
+    </div>
+    <div style="font-size: 25px;" class="mb-3 d-flex justify-content-center">
+        <dl class="row">
+            <dt class="col-sm-12">
+                Nazwa
+            </dt>
+            <dd class = "col-sm-12">
+                @Html.DisplayFor(model => model.Name)
+            </dd>
+            <hr />
+            <dt class="col-sm-12">
+                Opis
+            </dt>
+            <dd class="col-sm-12">
+                @Html.DisplayFor(model => model.Description)
+            </dd>
+            <hr />
+            <dt class="col-sm-12">
+                Data powstania:
+            </dt>
+            <dd class="col-sm-12">
+                @Html.DisplayFor(model => model.CreationDate)
+            </dd>
+            <hr />
+            <dt class="col-sm-12">
+                Cena
+            </dt>
+            <dd class="col-sm-12">
+                @Html.DisplayFor(model => model.Price)
+            </dd>
+            <hr />
+            <dt class="col-sm-12">
+                Czy dostępne?
+            </dt>
+            <dd class="col-sm-12">
+                @if (Model.IsAvaliable)
+                {
+                    @("TAK")
+                }
+                else
+                {
+                    @("NIE")
+                }
+            </dd>
+            <hr />
+            <dt class="col-sm-12">
+                Kategoria
+            </dt>
+            <dd class="col-sm-12">
+                @Html.DisplayFor(model => model.Category.Name)
+            </dd>
+            <hr />
+            <dt class="col-sm-12">
+                Składniki
+            </dt>
+            <dd class="col-sm-12">
+                |
+                @foreach (var item in Model.Ingredients)
+                {
+                    @(item.Name + " | ")
+                }
+            </dd>
+        </dl>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.DishID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
