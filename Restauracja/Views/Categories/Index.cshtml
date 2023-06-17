@@ -1,35 +1,43 @@
 ﻿@model IEnumerable<Restauracja.Models.Category>
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Kategorie";
 }
 
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.CategoryID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.CategoryID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.CategoryID">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<section>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="d-flex justify-content-center">
+                <h1 class="welcom_on_page">Kategorie</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="d-flex justify-content-center">
+                <a asp-action="Create"><button type="button" class="btn btn-success add-button">Dodaj</button></a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="d-flex justify-content-center admin_dishes">
+                <table class="table table-striped table-dark">
+                    <thead>
+                        <tr>
+                            <th>Nazwa</th>
+                            <th>Akcja</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model) {
+                            <tr class="dish-tr">
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Name)
+                                </td>                             
+                                <td>
+                                    <a asp-action="Delete" asp-route-id="@item.CategoryID">Usuń</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

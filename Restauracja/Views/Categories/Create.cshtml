@@ -1,5 +1,5 @@
 ﻿@model Restauracja.Models.Category
-
+@*
 @{
     ViewData["Title"] = "Create";
 }
@@ -26,6 +26,35 @@
 
 <div>
     <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}*@
+
+
+@{
+    ViewData["Title"] = "Kategorie";
+}
+<br />
+
+<h2 class="admin_label mb-3">Dodawanie kategorii</h2>
+<hr />
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-3">
+        <label class="form-label admin_label">Nazwa</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <input type="submit" value="Dodaj" class="btn btn-success" />
+    </div>
+</form>
+<div class="mb-3">
+    <a asp-action="Index"><button class="btn btn-primary">Wróć do listy</button></a>
 </div>
 
 @section Scripts {

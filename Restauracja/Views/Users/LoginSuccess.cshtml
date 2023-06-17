@@ -1,0 +1,4 @@
+﻿@inject IHttpContextAccessor context;
+<p>Role: @context.HttpContext.Session.GetString("role")</p>
+<p>Role: @context.HttpContext.Session.GetString("firstName")</p>
+<p>Role: @context.HttpContext.Session.GetString("lastName")</p>

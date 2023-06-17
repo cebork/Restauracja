@@ -5,8 +5,8 @@ namespace Restauracja.Models
     public class Dish
     {
         public long DishID { get; set; }
-        public string? Name { get; set; }
-        public string? Description { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
 
         [DataType(DataType.Date)]
         public DateTime CreationDate { get; set; }
@@ -15,6 +15,8 @@ namespace Restauracja.Models
         public string? Image { get; set; }
 
         public virtual Category? Category { get; set; }
-        public virtual List<Ingredient>? Ingredients { get; set; }
+        public List<Ingredient> Ingredients { get; set; } = new();
+        public virtual ICollection<Cart>? Carts { get; set; }
+
     }
 }

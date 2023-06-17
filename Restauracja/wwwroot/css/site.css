@@ -25,12 +25,14 @@ html, body {
     height: 100%;
 }
 
-article {
-    min-height: calc(100% - 100px)
+.article-content {
+    padding-bottom: 50px;
+    min-height: calc(100% - 50px)
 }
 
 .text-color {
     color: rgb(200, 200, 200);
+
 }
 
 .active, .mask:hover {
@@ -38,21 +40,14 @@ article {
 }
 
 footer {
-    position: sticky;
+    position: fixed;
     bottom: 0;
-    height: 50px;
+    padding: 12px;
     text-align: center;
     width: 100%;
     color: rgb(200, 200, 200);
     background-color: rgb(47, 49, 54);
     font-family: 'Courier New', monospace;
-}
-
-.footer-content {
-    padding-top: 1.25%;
-    display: flex;
-    align-items: center; 
-    justify-content: center;
 }
 
 nav {

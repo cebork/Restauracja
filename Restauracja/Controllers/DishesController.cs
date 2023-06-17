@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Restauracja.Data;
 using Restauracja.Models;
+using Restauracja.Services;
 using Restauracja.ViewModels;
 
 namespace Restauracja.Controllers
@@ -14,10 +15,11 @@ namespace Restauracja.Controllers
     public class DishesController : Controller
     {
         private readonly RestauracjaContext _context;
-
-        public DishesController(RestauracjaContext context)
+        private readonly IDishService _dishService;
+        public DishesController(RestauracjaContext context, IDishService dishService)
         {
             _context = context;
+            _dishService = dishService;
         }
 
         // GET: Dishes
@@ -25,31 +27,7 @@ namespace Restauracja.Controllers
         {
             if (_context.Dish != null)
             {
-                List<Dish> dishes = await _context.Dish.ToListAsync();
-                int pageSize = 10;
-                int totalItems = dishes.Count();
-                int totalPages = (int)Math.Ceiling((double) totalItems / pageSize);
-                if (page < 1)
-                {
-                    page = 1;
-                }
-                else if (page > totalPages)
-                {
-                    page = totalPages;
-                }
-                List<Dish> pagedDishes = dishes.OrderBy(i => i.DishID)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
-
-                var viewModel = new PaginationViewModel<Dish>
-                {
-                    Items = pagedDishes,
-                    CurrentPage = page,
-                    PageSize = pageSize,
-                    TotalItems = totalItems,
-                    TotalPages = totalPages
-                };
+                PaginationViewModel<Dish> viewModel = await _dishService.FillPaginationViewModelAsync(page);
                 return View(viewModel);
             }
             else
@@ -66,11 +44,7 @@ namespace Restauracja.Controllers
                 return NotFound();
             }
 
-            var dish = await _context.Dish
-                .Include(d => d.Category)
-                .Include(i => i.Ingredients)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.DishID == id);
+            Dish dish = await _dishService.GetDishByIdAsync(id);
             if (dish == null)
             {
                 return NotFound();
@@ -82,21 +56,7 @@ namespace Restauracja.Controllers
         // GET: Dishes/Create
         public async Task<IActionResult> Create()
         {
-            CreateDishViewModel createDishViewModel = new CreateDishViewModel();
-            createDishViewModel.CategoryViewModel = new CategoryViewModel
-            {
-                Categories = await _context.Category.Select(cast => new SelectListItem
-                {
-                    Value = cast.CategoryID.ToString(),
-                    Text = cast.Name
-                }).ToListAsync()
-            };
-            createDishViewModel.IngredientViewModel = _context.Ingredient.Select(i => new IngredientViewModel
-            {
-                IngredientID = i.IngredientID,
-                Name = i.Name,
-                IsSelected = false
-            });
+            CreateDishViewModel createDishViewModel = await _dishService.FillCreateDishViewModelForDisplayAsync();
             return View(createDishViewModel);
         }
 
@@ -105,38 +65,19 @@ namespace Restauracja.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("DishID,Name,Description,CreationDate,Price,IsAvaliable,Image")] Dish dish, IFormFile? imageFile, int category, List<long> selectedIngredients)
+        public async Task<IActionResult> Create(CreateDishViewModel createDishViewModel)
         {
 
-            if (selectedIngredients != null)
-            {
-                var ingredients = _context.Ingredient
-                    .Where(i => selectedIngredients.Contains(i.IngredientID))
-                    .ToListAsync();
-                dish.Ingredients = ingredients.Result;
-            }
-            if (category != null)
-            {
-                dish.Category = _context.Category.ToListAsync().Result.Where(el => el.CategoryID == category).ToList()[0];
-            }
-            if (imageFile != null && imageFile.Length > 0)
-            {
-                using var memoryStream = new MemoryStream();
-                await imageFile.CopyToAsync(memoryStream);
-                byte[] data = memoryStream.ToArray();
-                dish.Image = Convert.ToBase64String(data);
-            }
-            else
-            {
-                dish.Image = null;            }
+            createDishViewModel = await _dishService.FillCreateDishViewModelForSaveAsync(createDishViewModel);
             if (ModelState.IsValid)
             {
-                _context.Add(dish);
+                _context.Add(createDishViewModel.Dish);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(dish);
+            return View(createDishViewModel);
         }
+
 
         // GET: Dishes/Edit/5
         public async Task<IActionResult> Edit(long? id)
@@ -145,33 +86,12 @@ namespace Restauracja.Controllers
             {
                 return NotFound();
             }
-
-
-            var dish = await _context.Dish
-                .Include(d => d.Category)
-                .Include(i => i.Ingredients)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.DishID == id);
+            Dish dish = await _dishService.GetDishByIdAsync(id);
             if (dish == null)
             {
                 return NotFound();
             }
-            CreateDishViewModel createDishViewModel = new CreateDishViewModel();
-            createDishViewModel.Dish = dish;
-            createDishViewModel.CategoryViewModel = new CategoryViewModel
-            {
-                Categories = await _context.Category.Select(cast => new SelectListItem
-                {
-                    Value = cast.CategoryID.ToString(),
-                    Text = cast.Name
-                }).ToListAsync()
-            };
-            createDishViewModel.IngredientViewModel = _context.Ingredient.Select(i => new IngredientViewModel
-            {
-                IngredientID = i.IngredientID,
-                Name = i.Name,
-                IsSelected = dish.Ingredients.Contains(i) ? true : false
-            });
+            CreateDishViewModel createDishViewModel = await _dishService.FillCreateDishViewModelForDisplayEditFormAsync(id, dish);
             return View(createDishViewModel);
         }
 
@@ -180,34 +100,16 @@ namespace Restauracja.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit([Bind("DishID,Name,Description,CreationDate,Price,IsAvaliable,Image")] Dish dish, IFormFile? imageFile, int category, List<long> selectedIngredients)
+        public async Task<IActionResult> Edit(CreateDishViewModel createDishViewModel)
         {
-
-            if (selectedIngredients != null)
-            {
-                var ingredients = _context.Ingredient
-                    .Where(i => selectedIngredients.Contains(i.IngredientID))
-                    .ToListAsync();
-                dish.Ingredients = ingredients.Result;
-            }
-            if (category != null)
-            {
-                dish.Category = _context.Category.ToListAsync().Result.Where(el => el.CategoryID == category).ToList()[0];
-            }
-            if (imageFile != null && imageFile.Length > 0)
-            {
-                using var memoryStream = new MemoryStream();
-                await imageFile.CopyToAsync(memoryStream);
-                byte[] data = memoryStream.ToArray();
-                dish.Image = Convert.ToBase64String(data);
-            }
+            createDishViewModel = await _dishService.FillCreateDishViewModelForEditAsync(createDishViewModel);
             if (ModelState.IsValid)
             {
-                _context.Add(dish);
+                _context.Update(createDishViewModel.Dish);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(dish);
+            return View(createDishViewModel);
         }
 
         // GET: Dishes/Delete/5

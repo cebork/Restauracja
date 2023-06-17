@@ -1,4 +1,18 @@
-﻿<!DOCTYPE html>
+﻿@inject IHttpContextAccessor context;
+@{
+    string role = context.HttpContext.Session.GetString("role");
+    string firstName = context.HttpContext.Session.GetString("firstName");
+    string lastName = context.HttpContext.Session.GetString("lastName");
+    bool isLoggedIn = context.HttpContext.Session.TryGetValue("role", out byte[] sessionBytes1)
+            && context.HttpContext.Session.TryGetValue("firstName", out byte[] sessionBytes2)
+            && context.HttpContext.Session.TryGetValue("lastName", out byte[] sessionBytes3) ? true : false;
+
+    
+    
+    
+
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -17,80 +31,66 @@
                     <li class="naav nav-item mask navi">
                         <a class="nav-link text-white" asp-area="" asp-controller="Dishes" asp-action="Index">Lista dań</a>
                     </li>
-                    <li class="naav nav-item mask navi">
-                        <a class="nav-link text-white" aria-current="page" >Zamówienia</a>
-                    </li>
-                    <li class="naav nav-item mask navi">
-                        <a class="nav-link text-white" aria-current="page" >Zamówienia - admin</a>
-                    </li>
-
-                    <li class="naav nav-item mask navi">
-                        <a class="nav-link text-white" aria-current="page" >Składniki</a>
-                    </li>
-                    <li class="naav nav-item mask navi">
-                        <a class="nav-link text-white" aria-current="page" asp-area="" asp-controller="Categories" asp-action="Index">Kategorie</a>
-                    </li>
-                    <li class="naav nav-item mask navi">
-                        <a class="nav-link text-white" aria-current="page" >Użytkownicy</a>
-                    </li>
-                    <li class="naav nav-item mask navi">
-                        <a class="nav-link text-white" aria-current="page" >JA</a>
-                    </li>
+                    @if (isLoggedIn)
+                    {
+                        <li class="naav nav-item mask navi">
+                            <a class="nav-link text-white" aria-current="page">Zamówienia</a>
+                        </li>
+                        @if(role == "Admin")
+                        {
+                            <li class="naav nav-item mask navi">
+                                <a class="nav-link text-white" aria-current="page" >Zamówienia - admin</a>
+                            </li>
+                            <li class="naav nav-item mask navi">
+                                <a class="nav-link text-white" aria-current="page" >Składniki</a>
+                            </li>
+                            <li class="naav nav-item mask navi">
+                                <a class="nav-link text-white" aria-current="page" asp-area="" asp-controller="Categories" asp-action="Index">Kategorie</a>
+                            </li>
+                            <li class="naav nav-item mask navi">
+                                <a class="nav-link text-white" aria-current="page" >Użytkownicy</a>
+                            </li>
+                        }
+                        <li class="naav nav-item mask navi">
+                            <a class="nav-link text-white" aria-current="page" >JA</a>
+                        </li>
+                    }
                 </ul>
             </div>
-            @*<ul class="navbar-nav me-auto mb-2 mb-lg-0 login-segment">
-                <li class="nav-item navi">
-                    <a><button type="button" class="btn btn-primary logedas">Zaloguj się</button></a>
+            @if (!isLoggedIn)
+            {
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 login-segment">
+                    <li class="nav-item navi">
+                        <a asp-area="" asp-controller="Users" asp-action="Login">
+                            <button type="button" class="btn btn-primary logedas">Zaloguj się</button>
+                        </a>
+                    </li>
+                </ul>
+            }
+            else
+            {
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 login-segment">
+                    <li class="naav nav-item mask navi">
+                        <a class="nav-link text-white" aria-current="page" asp-area="" asp-controller="Carts" asp-action="Index">Koszyk</a>
+                    </li>
+                    <li class="text-white nav-item navi logedas">
+                        <span>Jesteś zalogowany jako <b>@firstName @lastName </b></span>
+                    </li>
+                    <li class="nav-item navi">
+                        <a asp-area="" asp-controller="Users" asp-action="Logout">
+                            <button type="submit" class="btn btn-primary logedas">Wyloguj się</button>
+                        </a>
                 </li>
-                <li class="nav-item navi">
-                    <a>EN</a> | <a>PL</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0 login-segment">
-                <li class="naav nav-item mask navi">
-                    <a class="nav-link text-white" aria-current="page" >Koszyk</a>
-                </li>
-                <li class="text-white nav-item navi logedas">
-                    <span>Jesteś zalogowany jako </span><b><span/></b>
-                </li>
-                <li class="nav-item navi">
-                    <form id="logout" th:method="post">
-                        <button type="submit" class="btn btn-primary logedas" >Wyloguj się</button>
-                    </form>
-                </li>
-                <li class="nav-item navi">
-                    <a>EN</a> | <a>PL</a>
-                </li>
-            </ul>*@
+                </ul>
+            }
+            
         </div>
     </nav>
 
-
-
-
-@*    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Restauracja</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>*@
     <article>
-        @RenderBody()
+        <div class="article-content">
+            @RenderBody()
+        </div>
     </article>
 
 

@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Restauracja.Data;
 using Restauracja.DBSeeding;
 using Restauracja.Models;
+using Restauracja.Services;
 
 namespace Restauracja
 {
@@ -17,6 +18,15 @@ namespace Restauracja
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(option =>
+            {
+                option.IOTimeout = TimeSpan.FromMinutes(60);
+            });
+
+            builder.Services.AddScoped<IDishService, DishService>();
+
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())
@@ -25,6 +35,7 @@ namespace Restauracja
 
                 CategorySeeding.Initialize(services);
                 IngredientSeeding.Initialize(services);
+                RoleSeeding.Initialize(services);
             }
 
             // Configure the HTTP request pipeline.
@@ -40,6 +51,8 @@ namespace Restauracja
 
             app.UseRouting();
 
+            app.UseSession();
+
             app.UseAuthorization();
 
             app.MapControllerRoute(
@@ -48,5 +61,9 @@ namespace Restauracja
 
             app.Run();
         }
+
+
+
+
     }
 }
