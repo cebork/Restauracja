@@ -16,6 +16,7 @@ namespace Restauracja.Models
 
         public virtual Category? Category { get; set; }
         public List<Ingredient> Ingredients { get; set; } = new();
+
         public virtual ICollection<Cart>? Carts { get; set; }
 
     }

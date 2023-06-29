@@ -116,7 +116,12 @@ namespace Restauracja.Services
             }
             else
             {
-                createDishViewModel.Dish.Image = null;
+                Dish tempDish = GetDishByIdAsync(createDishViewModel.Dish.DishID).Result;
+
+                if (tempDish.Image != null)
+                {
+                    createDishViewModel.Dish.Image = tempDish.Image;
+                }
             }
             return createDishViewModel;
         }

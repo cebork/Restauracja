@@ -1,36 +1,90 @@
 ﻿@model IEnumerable<Restauracja.Models.Cart>
 
 @{
-    ViewData["Title"] = "Index";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Koszyk";
 }
 
-<h1>Index</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Amount)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Amount)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.CartId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.CartId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.CartId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+
+
+
+<section>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="d-flex justify-content-center">
+                <h1 class="welcom_on_page">Koszyk</h1>
+            </div>
+            <div class="d-flex justify-content-center">
+                @if (Model.Any())
+                {
+                    <h2 class="welcom_on_page">Całkowita wartość koszyka:
+                        @{long suma = 0;}
+                        @foreach (var item in Model)
+                        {
+                            suma += item.Amount * item.Dish.Price;
+                        }
+                        @(suma)
+                        PLN
+                    </h2>
+                }
+            </div>
+            <div class="d-flex justify-content-center">
+                <button style="margin-bottom: 10px;"class="btn btn-success">Zamów</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="d-flex justify-content-center admin_dishes">
+                @if(Model.Any())
+                {
+                    <table class="table table-striped table-dark">
+                        <thead>
+                            <tr>
+                                <th>Zdjęcie</th>
+                                <th>Nazwa</th>
+                                <th>Ilość</th>
+                                <th class="col-md-2">Cena [PLN]</th>
+                                <th>Akcja</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model) {
+                                <tr class="dish-tr">
+                                    <td class="dish-img-td">
+                                        @if (!string.IsNullOrEmpty(item.Dish.Image))
+                                        {
+                                            <img class="dish-img-td" src="data:image;base64,@Html.DisplayFor(modelItem => item.Dish.Image)" alt="@Html.DisplayFor(modelItem => item.Dish.Name)" />
+                                        }
+                                        else
+                                        {
+                                            <img class="dish-img-td" src="~/static/Images/placeholder.jpg" alt="Brak zdjęcia" />
+                                        }
+
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Dish.Name)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Amount)
+                                    </td>
+                                    <td class="col-md-2">
+                                        @Html.DisplayFor(modelItem => item.Dish.Price)
+                                    </td>
+                                
+                                    <td>
+                                        <a asp-controller="Dishes" asp-action="Details" asp-route-id="@item.DishID">Szczegóły</a> |
+                                        <a asp-action="Delete" asp-route-id="@item.CartId">Usuń</a>
+                                    </td>
+                                </tr>
+                            }  
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="text-white"><h2>Koszyk jest pusty</h2></div>
+                }
+                
+            </div>
+        </div>        
+    </div>
+</section>

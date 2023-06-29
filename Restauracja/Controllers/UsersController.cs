@@ -202,6 +202,7 @@ namespace Restauracja.Controllers
                 _contextAccessor.HttpContext.Session.SetString("role", user.Role.Name);
                 _contextAccessor.HttpContext.Session.SetString("firstName", user.FirstName);
                 _contextAccessor.HttpContext.Session.SetString("lastName", user.LastName);
+                _contextAccessor.HttpContext.Session.SetInt32("userID", user.UserId);
                 return RedirectToAction("Index", "Home");
             }
             else

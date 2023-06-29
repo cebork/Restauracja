@@ -12,8 +12,8 @@ using Restauracja.Data;
 namespace Restauracja.Migrations
 {
     [DbContext(typeof(RestauracjaContext))]
-    [Migration("20230617202701_innitxxxxxx222222")]
-    partial class innitxxxxxx222222
+    [Migration("20230617213601_initx")]
+    partial class initx
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

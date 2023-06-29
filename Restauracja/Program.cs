@@ -26,7 +26,7 @@ namespace Restauracja
             });
 
             builder.Services.AddScoped<IDishService, DishService>();
-
+            builder.Services.AddScoped<ICartService, CartService>();
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())

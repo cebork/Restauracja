@@ -80,8 +80,9 @@
                                         <a asp-action="Delete" asp-route-id="@item.DishID">Usuń</a>
                                         <div class="d-flex justify-content-center">
                                             @if(item.IsAvaliable){
-                                                <form method="POST">
-                                                    <input min="1" class="form-control cart_amount" type="number" name="ilosc" value="1" />
+                                                <form action="@Url.Action("ToCart", "Carts")" method="POST">
+                                                    <input type="hidden" name="dish" value="@item.DishID"/>
+                                                    <input min="1" class="form-control cart_amount" type="number" name="amount" value="1" />
                                                     <button class="btn btn-success add-button" type="submit">Dodaj do koszyka</button>
                                                 </form>
                                             }
@@ -89,37 +90,10 @@
                                             {
                                                 <h3>Brak produktu</h3>
                                             }
-                                            
                                         </div>
                                     </td>
                                 </tr>
-                            }
-                            
-                            @*<span th:each="zam : ${lista}">
-                                <tr class="dish-tr">
-                                    <td>
-                                        <img th:if="${zam.image} == null" class="dish-img-td" src="/images/placeholder.jpg"/>
-                                        <img th:if="${zam.image} != null" class="dish-img-td" th:src="'data:image/*;base64,' + ${zam.image}"/>
-                                    </td>
-                                    <td th:text="${zam.nazwa}"></td>
-                                    <td th:text="${#numbers.formatDecimal(zam.cena, 2, 2, 'COMMA')} + ' PLN'"></td>
-                                    <td>
-                                        <div class="d-flex justify-content-center">
-                                            <a class="list_menu" sec:authorize="hasAnyRole('USER', 'SUPER_ADMIN')" th:href="@{/details?id=} + ${zam.Id}" th:text="#{dishList.details}"></a>
-                                            <a class="list_menu" sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')" th:href="@{/edit?id=} + ${zam.Id}" th:text="#{dishList.edit}"></a>
-                                            <a class="list_menu" sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')" th:href="@{/delete?id=} + ${zam.Id}" th:text="#{dishList.delete}"></a>
-                                        </div>
-                                        @*<div  sec:authorize="hasAnyRole('USER', 'ADMIN', 'SUPER_ADMIN')" class="d-flex justify-content-center">
-                                            <form th:if="${zam.dostepne} == true" method="GET" th:action="@{/addToCart}">
-                                                <input type="hidden" name="id" th:value="${zam.Id}"/>
-                                                <input min="1" class="form-control cart_amount" type="number" name="ilosc" value="1"/>
-                                                <button class="btn btn-success add-button" type="submit" th:text="#{dishList.YesAvaliable}"></button>
-                                            </form>
-                                            <h3 th:if="${zam.dostepne} == false" th:text="#{dishList.NoAvaliable}"></h3>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </span>*@
+                            }  
                         </tbody>
                     </table>
                 }

@@ -7,25 +7,39 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Restauracja.Data;
 using Restauracja.Models;
+using Restauracja.Services;
+using Restauracja.ViewModels;
 
 namespace Restauracja.Controllers
 {
     public class CartsController : Controller
     {
         private readonly RestauracjaContext _context;
-
-        public CartsController(RestauracjaContext context)
+        private readonly ICartService _cartService;
+        public CartsController(RestauracjaContext context, ICartService cartService)
         {
+            _cartService = cartService;
             _context = context;
         }
+
 
         // GET: Carts
         public async Task<IActionResult> Index()
         {
-              return _context.Cart != null ? 
-                          View(await _context.Cart.ToListAsync()) :
-                          Problem("Entity set 'RestauracjaContext.Cart'  is null.");
+            
+            
+            return View(_cartService.getCurrentUserCart().ToList());
         }
+
+
+        [HttpPost]
+        public IActionResult ToCart(long dish, int amount)
+        {
+            _cartService.AddElementToCart(dish, amount);
+            return RedirectToAction("Index", "Carts");
+        }
+
+
 
         // GET: Carts/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -36,6 +50,8 @@ namespace Restauracja.Controllers
             }
 
             var cart = await _context.Cart
+                .Include(c => c.Dish)
+                .Include(c => c.User)
                 .FirstOrDefaultAsync(m => m.CartId == id);
             if (cart == null)
             {
@@ -48,6 +64,8 @@ namespace Restauracja.Controllers
         // GET: Carts/Create
         public IActionResult Create()
         {
+            ViewData["DishID"] = new SelectList(_context.Dish, "DishID", "DishID");
+            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId");
             return View();
         }
 
@@ -56,7 +74,7 @@ namespace Restauracja.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CartId,Amount")] Cart cart)
+        public async Task<IActionResult> Create([Bind("CartId,Amount,DishID,UserId")] Cart cart)
         {
             if (ModelState.IsValid)
             {
@@ -64,6 +82,8 @@ namespace Restauracja.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["DishID"] = new SelectList(_context.Dish, "DishID", "DishID", cart.DishID);
+            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", cart.UserId);
             return View(cart);
         }
 
@@ -80,6 +100,8 @@ namespace Restauracja.Controllers
             {
                 return NotFound();
             }
+            ViewData["DishID"] = new SelectList(_context.Dish, "DishID", "DishID", cart.DishID);
+            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", cart.UserId);
             return View(cart);
         }
 
@@ -88,7 +110,7 @@ namespace Restauracja.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CartId,Amount")] Cart cart)
+        public async Task<IActionResult> Edit(int id, [Bind("CartId,Amount,DishID,UserId")] Cart cart)
         {
             if (id != cart.CartId)
             {
@@ -115,6 +137,8 @@ namespace Restauracja.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["DishID"] = new SelectList(_context.Dish, "DishID", "DishID", cart.DishID);
+            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", cart.UserId);
             return View(cart);
         }
 
@@ -127,13 +151,16 @@ namespace Restauracja.Controllers
             }
 
             var cart = await _context.Cart
+                .Include(c => c.Dish)
+                .Include(c => c.User)
                 .FirstOrDefaultAsync(m => m.CartId == id);
-            if (cart == null)
+            if (cart != null)
             {
-                return NotFound();
+                _context.Cart.Remove(cart);
             }
 
-            return View(cart);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // POST: Carts/Delete/5
