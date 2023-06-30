@@ -4,7 +4,7 @@
     {
         public long IngredientID { get; set; }
         public string? Name { get; set; }
-
+        public bool IsDeleted { get; set; }
         public List<Dish> Dishes { get; set;  } = new();
         public override bool Equals(object? obj)
         {

@@ -1,11 +1,13 @@
-﻿@model Restauracja.Models.Category
+﻿@model Restauracja.Models.Ingredient
 
 @{
-    ViewData["Title"] = "Kategorie";
+    ViewData["Title"] = "Składniki";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <br />
 
-<h2 class="admin_label mb-3">Dodawanie kategorii</h2>
+<h2 class="admin_label mb-3">Dodawanie składnika</h2>
 <hr />
 
 <form asp-action="Create" method="post">

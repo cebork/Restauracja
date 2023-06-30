@@ -22,8 +22,10 @@ namespace Restauracja.Controllers
         // GET: Categories
         public async Task<IActionResult> Index()
         {
+            var categoriesAll = await _context.Category.ToListAsync();
+            List<Category> categoriesListNotDeleted = categoriesAll.Where(c => c.IsDeleted == false).ToList();
             return _context.Category != null ?
-                        View(await _context.Category.ToListAsync()) :
+                        View(categoriesListNotDeleted) :
                         Problem("Entity set 'RestauracjaContext.Category'  is null.");
         }
 
@@ -148,7 +150,8 @@ namespace Restauracja.Controllers
             var category = await _context.Category.FindAsync(id);
             if (category != null)
             {
-                _context.Category.Remove(category);
+                category.IsDeleted = true;
+                _context.Category.Update(category);
             }
 
             await _context.SaveChangesAsync();

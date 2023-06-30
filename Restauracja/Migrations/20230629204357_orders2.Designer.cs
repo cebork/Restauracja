@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Restauracja.Data;
 
@@ -11,9 +12,11 @@ using Restauracja.Data;
 namespace Restauracja.Migrations
 {
     [DbContext(typeof(RestauracjaContext))]
-    partial class RestauracjaContextModelSnapshot : ModelSnapshot
+    [Migration("20230629204357_orders2")]
+    partial class orders2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,9 +58,6 @@ namespace Restauracja.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryID"));
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -128,9 +128,6 @@ namespace Restauracja.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("IngredientID"));
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -149,9 +146,6 @@ namespace Restauracja.Migrations
 
                     b.Property<int>("FullPrice")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsDelivered")
-                        .HasColumnType("bit");
 
                     b.Property<int>("OrderContentId")
                         .HasColumnType("int");

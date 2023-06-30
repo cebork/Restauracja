@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Restauracja.Data;
 
@@ -11,9 +12,11 @@ using Restauracja.Data;
 namespace Restauracja.Migrations
 {
     [DbContext(typeof(RestauracjaContext))]
-    partial class RestauracjaContextModelSnapshot : ModelSnapshot
+    [Migration("20230629204141_orders")]
+    partial class orders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,9 +58,6 @@ namespace Restauracja.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryID"));
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -128,9 +128,6 @@ namespace Restauracja.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("IngredientID"));
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -150,10 +147,10 @@ namespace Restauracja.Migrations
                     b.Property<int>("FullPrice")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsDelivered")
-                        .HasColumnType("bit");
+                    b.Property<long>("OrderContentId")
+                        .HasColumnType("bigint");
 
-                    b.Property<int>("OrderContentId")
+                    b.Property<int>("OrderContentId1")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
@@ -161,7 +158,7 @@ namespace Restauracja.Migrations
 
                     b.HasKey("OrderId");
 
-                    b.HasIndex("OrderContentId");
+                    b.HasIndex("OrderContentId1");
 
                     b.HasIndex("UserId");
 
@@ -308,7 +305,7 @@ namespace Restauracja.Migrations
                 {
                     b.HasOne("Restauracja.Models.OrderContent", "OrderContent")
                         .WithMany("Orders")
-                        .HasForeignKey("OrderContentId")
+                        .HasForeignKey("OrderContentId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
