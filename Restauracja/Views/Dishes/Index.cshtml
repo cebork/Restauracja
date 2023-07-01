@@ -1,4 +1,13 @@
 ﻿@model Restauracja.ViewModels.PaginationViewModel<Restauracja.Models.Dish>
+@inject IHttpContextAccessor context;
+@{
+    string role = context.HttpContext.Session.GetString("role");
+    string firstName = context.HttpContext.Session.GetString("firstName");
+    string lastName = context.HttpContext.Session.GetString("lastName");
+    bool isLoggedIn = context.HttpContext.Session.TryGetValue("role", out byte[] sessionBytes1)
+            && context.HttpContext.Session.TryGetValue("firstName", out byte[] sessionBytes2)
+            && context.HttpContext.Session.TryGetValue("lastName", out byte[] sessionBytes3) ? true : false;
+}
 @{
     ViewData["Title"] = "Lista dań";
 }
@@ -36,9 +45,16 @@
             </div>
         </form>*@
         <div class="row">
-            <div class="d-flex justify-content-center">
-                <a asp-action="Create"><button type="button" class="btn btn-success add-button">Dodaj</button></a>
-            </div>
+            @if(isLoggedIn)
+            {
+                @if (role == "Admin")
+                {
+                    <div class="d-flex justify-content-center">
+                        <a asp-action="Create"><button type="button" class="btn btn-success add-button">Dodaj</button></a>
+                    </div>
+                }
+            }
+                
         </div>
         <div class="row">
             <div class="d-flex justify-content-center admin_dishes">
@@ -75,22 +91,31 @@
                                     </td>
                                 
                                     <td>
-                                        <a asp-action="Edit" asp-route-id="@item.DishID">Edycja</a> |
-                                        <a asp-action="Details" asp-route-id="@item.DishID">Szczegóły</a> |
-                                        <a asp-action="Delete" asp-route-id="@item.DishID">Usuń</a>
-                                        <div class="d-flex justify-content-center">
-                                            @if(item.IsAvaliable){
-                                                <form action="@Url.Action("ToCart", "Carts")" method="POST">
-                                                    <input type="hidden" name="dish" value="@item.DishID"/>
-                                                    <input min="1" class="form-control cart_amount" type="number" name="amount" value="1" />
-                                                    <button class="btn btn-success add-button" type="submit">Dodaj do koszyka</button>
-                                                </form>
-                                            }
-                                            else
+                                        <a asp-action="Details" asp-route-id="@item.DishID">Szczegóły</a>
+                                        @if(isLoggedIn)
+                                        {
+                                            @if (role == "Admin")
                                             {
-                                                <h3>Brak produktu</h3>
+                                                @("| ")<a asp-action="Edit" asp-route-id="@item.DishID">Edycja</a>@(" |")
+                                                <a asp-action="Delete" asp-route-id="@item.DishID">Usuń</a>
                                             }
-                                        </div>
+                                        
+                                        
+                                            <div class="d-flex justify-content-center">
+                                                @if(item.IsAvaliable)
+                                                {
+                                                    <form action="@Url.Action("ToCart", "Carts")" method="POST">
+                                                        <input type="hidden" name="dish" value="@item.DishID"/>
+                                                        <input min="1" class="form-control cart_amount" type="number" name="amount" value="1" />
+                                                        <button class="btn btn-success add-button" type="submit">Dodaj do koszyka</button>
+                                                    </form>
+                                                }
+                                                else
+                                                {
+                                                    <h3>Brak produktu</h3>
+                                                }
+                                            </div>
+                                        }
                                     </td>
                                 </tr>
                             }  

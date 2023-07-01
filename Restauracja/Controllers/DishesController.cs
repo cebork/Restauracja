@@ -16,10 +16,12 @@ namespace Restauracja.Controllers
     {
         private readonly RestauracjaContext _context;
         private readonly IDishService _dishService;
-        public DishesController(RestauracjaContext context, IDishService dishService)
+        private readonly IUserService _userService;
+        public DishesController(RestauracjaContext context, IDishService dishService, IUserService userService)
         {
             _context = context;
             _dishService = dishService;
+            _userService = userService;
         }
 
         // GET: Dishes
@@ -56,8 +58,12 @@ namespace Restauracja.Controllers
         // GET: Dishes/Create
         public async Task<IActionResult> Create()
         {
-            CreateDishViewModel createDishViewModel = await _dishService.FillCreateDishViewModelForDisplayAsync();
-            return View(createDishViewModel);
+            if (_userService.CheckIfAdmin())
+            {
+                CreateDishViewModel createDishViewModel = await _dishService.FillCreateDishViewModelForDisplayAsync();
+                return View(createDishViewModel);
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         // POST: Dishes/Create
@@ -67,32 +73,39 @@ namespace Restauracja.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateDishViewModel createDishViewModel)
         {
-
-            createDishViewModel = await _dishService.FillCreateDishViewModelForSaveAsync(createDishViewModel);
-            if (ModelState.IsValid)
+            if (_userService.CheckIfAdmin())
             {
-                _context.Add(createDishViewModel.Dish);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                createDishViewModel = await _dishService.FillCreateDishViewModelForSaveAsync(createDishViewModel);
+                if (ModelState.IsValid)
+                {
+                    _context.Add(createDishViewModel.Dish);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(createDishViewModel);
             }
-            return View(createDishViewModel);
+            return RedirectToAction("AccessDenied", "Users");
         }
 
 
         // GET: Dishes/Edit/5
         public async Task<IActionResult> Edit(long? id)
         {
-            if (id == null || _context.Dish == null)
+            if (_userService.CheckIfAdmin())
             {
-                return NotFound();
+                if (id == null || _context.Dish == null)
+                {
+                    return NotFound();
+                }
+                Dish dish = await _dishService.GetDishByIdAsync(id);
+                if (dish == null)
+                {
+                    return NotFound();
+                }
+                CreateDishViewModel createDishViewModel = await _dishService.FillCreateDishViewModelForDisplayEditFormAsync(id, dish);
+                return View(createDishViewModel);
             }
-            Dish dish = await _dishService.GetDishByIdAsync(id);
-            if (dish == null)
-            {
-                return NotFound();
-            }
-            CreateDishViewModel createDishViewModel = await _dishService.FillCreateDishViewModelForDisplayEditFormAsync(id, dish);
-            return View(createDishViewModel);
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         // POST: Dishes/Edit/5
@@ -102,32 +115,40 @@ namespace Restauracja.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(CreateDishViewModel createDishViewModel)
         {
-            createDishViewModel = await _dishService.FillCreateDishViewModelForEditAsync(createDishViewModel);
-            if (ModelState.IsValid)
+            if (_userService.CheckIfAdmin())
             {
-                _context.Update(createDishViewModel.Dish);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                createDishViewModel = await _dishService.FillCreateDishViewModelForEditAsync(createDishViewModel);
+                if (ModelState.IsValid)
+                {
+                    _context.Update(createDishViewModel.Dish);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(createDishViewModel);
             }
-            return View(createDishViewModel);
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         // GET: Dishes/Delete/5
         public async Task<IActionResult> Delete(long? id)
         {
-            if (id == null || _context.Dish == null)
+            if (_userService.CheckIfAdmin())
             {
-                return NotFound();
-            }
+                if (id == null || _context.Dish == null)
+                {
+                    return NotFound();
+                }
 
-            var dish = await _context.Dish
-                .FirstOrDefaultAsync(m => m.DishID == id);
-            if (dish == null)
-            {
-                return NotFound();
-            }
+                var dish = await _context.Dish
+                    .FirstOrDefaultAsync(m => m.DishID == id);
+                if (dish == null)
+                {
+                    return NotFound();
+                }
 
-            return View(dish);
+                return View(dish);
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         // POST: Dishes/Delete/5
@@ -135,18 +156,22 @@ namespace Restauracja.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(long id)
         {
-            if (_context.Dish == null)
+            if (_userService.CheckIfAdmin())
             {
-                return Problem("Entity set 'RestauracjaContext.Dish'  is null.");
-            }
-            var dish = await _context.Dish.FindAsync(id);
-            if (dish != null)
-            {
-                _context.Dish.Remove(dish);
-            }
+                if (_context.Dish == null)
+                {
+                    return Problem("Entity set 'RestauracjaContext.Dish'  is null.");
+                }
+                var dish = await _context.Dish.FindAsync(id);
+                if (dish != null)
+                {
+                    _context.Dish.Remove(dish);
+                }
             
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         private bool DishExists(long id)

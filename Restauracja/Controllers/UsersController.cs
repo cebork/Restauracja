@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -61,6 +63,8 @@ namespace Restauracja.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Email,FirstName,LastName,City,PostalCode,Address,PhoneNumber,Password")] UserViewModel userVM)
         {
+            var passwordHasher = new PasswordHasher<User>();
+            string hashedPassword = passwordHasher.HashPassword(null, userVM.Password);
             User user = new User()
             {
                 Email = userVM.Email,
@@ -70,16 +74,29 @@ namespace Restauracja.Controllers
                 PostalCode = userVM.PostalCode,
                 Address = userVM.Address,
                 PhoneNumber = userVM.PhoneNumber,
-                PasswordHash = userVM.Password
+                PasswordHash = hashedPassword,
+                ActivationCode = Guid.NewGuid().ToString()
             };
             user.Role = _context.Role.FindAsync(1).Result;
+
+            bool emailExists = _context.User.ToList().Where(u => u.Email == user.Email).Any();
+            bool phoneNumberExists = _context.User.ToList().Where(u => u.PhoneNumber == user.PhoneNumber).Any();
+
+            if (emailExists)
+            {
+                ModelState.AddModelError("", "Email jest zajęty");
+            }
+
+            if (phoneNumberExists)
+            {
+                ModelState.AddModelError("", "Numer telefonu jest zajęty");
+            }
 
             foreach (var item in ModelState.Values)
             {
                 foreach (var item2 in item.Errors)
                 {
                     Console.WriteLine(item2.ErrorMessage);
-                    Console.WriteLine(item2.Exception);
                 }
             }
             if (ModelState.IsValid)
@@ -88,7 +105,7 @@ namespace Restauracja.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(user);
+            return View(userVM);
         }
 
         // GET: Users/Edit/5
@@ -196,18 +213,29 @@ namespace Restauracja.Controllers
             User user = await _context.User
                 .Include(r => r.Role)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Email == loginVM.Email && u.PasswordHash == loginVM.Password);
-            if (user != null)
+                .FirstOrDefaultAsync(u => u.Email == loginVM.Email);
+            
+            if (user != null )
             {
-                _contextAccessor.HttpContext.Session.SetString("role", user.Role.Name);
-                _contextAccessor.HttpContext.Session.SetString("firstName", user.FirstName);
-                _contextAccessor.HttpContext.Session.SetString("lastName", user.LastName);
-                _contextAccessor.HttpContext.Session.SetInt32("userID", user.UserId);
-                return RedirectToAction("Index", "Home");
+                var passwordHasher = new PasswordHasher<User>();
+                var passwordVerificationResult = passwordHasher.VerifyHashedPassword(null, user.PasswordHash, loginVM.Password);
+                if (passwordVerificationResult == PasswordVerificationResult.Success)
+                {
+                    _contextAccessor.HttpContext.Session.SetString("role", user.Role.Name);
+                    _contextAccessor.HttpContext.Session.SetString("firstName", user.FirstName);
+                    _contextAccessor.HttpContext.Session.SetString("lastName", user.LastName);
+                    _contextAccessor.HttpContext.Session.SetInt32("userID", user.UserId);
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Hasło jest błędne");
+                }
+                
             }
             else
             {
-                ModelState.AddModelError("", "Email lub hasło jest niepoprawne");
+                ModelState.AddModelError("", "Konto o podanym mailu nie istnieje");
             }
 
             return View(loginVM);
@@ -218,9 +246,13 @@ namespace Restauracja.Controllers
             HttpContext.Session.Remove("role");
             HttpContext.Session.Remove("firstName");
             HttpContext.Session.Remove("lastName");
-
+            HttpContext.Session.Remove("userID");
             return RedirectToAction("Index", "Home");
         }
 
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
     }
 }

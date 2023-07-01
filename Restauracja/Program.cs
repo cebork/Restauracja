@@ -27,6 +27,9 @@ namespace Restauracja
 
             builder.Services.AddScoped<IDishService, DishService>();
             builder.Services.AddScoped<ICartService, CartService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+
+
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())
@@ -35,7 +38,7 @@ namespace Restauracja
 
                 CategorySeeding.Initialize(services);
                 IngredientSeeding.Initialize(services);
-                RoleSeeding.Initialize(services);
+                UserRoleSeeding.Initialize(services);
             }
 
             // Configure the HTTP request pipeline.
@@ -45,6 +48,9 @@ namespace Restauracja
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            
+
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

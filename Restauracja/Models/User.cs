@@ -11,6 +11,8 @@
         public string Address { get; set; }
         public string PhoneNumber { get; set; }
         public string PasswordHash { get; set; }
+        public bool IsActive { get; set; } = false;
+        public string ActivationCode { get; set; }
 
         public int RoleId { get; set; }
         public virtual Role Role { get; set; }

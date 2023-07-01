@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -185,6 +186,12 @@ namespace Restauracja.Controllers
         private bool CartExists(int id)
         {
           return (_context.Cart?.Any(e => e.CartId == id)).GetValueOrDefault();
+        }
+
+        public IActionResult moveToOrders()
+        {
+            _cartService.moveToOrders();
+            return RedirectToAction("Index", "Orders");
         }
     }
 }

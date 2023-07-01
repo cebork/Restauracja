@@ -9,6 +9,7 @@ namespace Restauracja.Services
     {
         void AddElementToCart(long dish, int amount);
         List<Cart> getCurrentUserCart();
+        void moveToOrders();
     }
     public class CartService : ICartService
     {
@@ -60,11 +61,28 @@ namespace Restauracja.Services
             return restauracjaContext.ToList();
         }
 
+        public void moveToOrders()
+        {
+            int userID = (int)_contextAccessor.HttpContext.Session.GetInt32("userID");
+            Order order = new Order();
+            order.UserId = userID;
+            _context.Add(order);
+
+            List<OrderContent> orderContents = _context.Cart.ToList().Where(c => c.UserId == userID).Select(c => new OrderContent { Amount = c.Amount, DishID = c.DishID, Order = order }).ToList();
+            List<Dish> allDished = _context.Dish.ToList();
+            order.FullPrice = (int)orderContents.Sum(c => c.Amount * allDished.Find(aD => aD.DishID == c.DishID).Price);
+            _context.AddRange(orderContents);
+
+            List<Cart> cartToRemove = _context.Cart.ToList().Where(c => c.UserId == userID).ToList();
+            _context.RemoveRange(cartToRemove);
+            _context.SaveChanges();
+        }
+
         public Cart VerifyIfDishAdded(User user, Dish dish)
         {
             List<Cart> carts = _context.Cart.Include(c => c.Dish).Include(c => c.User).ToList();
             Cart cart = null;
-            if (carts.Count > 0 && carts.Where(c => c.DishID == dish.DishID).Any())
+            if (carts.Count > 0 && carts.Where(c => c.DishID == dish.DishID && c.UserId == user.UserId).Any())
             {
                 cart = carts.Where(c => c.UserId == user.UserId && c.DishID == dish.DishID).First();
             }

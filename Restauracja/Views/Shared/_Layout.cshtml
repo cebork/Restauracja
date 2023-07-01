@@ -6,11 +6,6 @@
     bool isLoggedIn = context.HttpContext.Session.TryGetValue("role", out byte[] sessionBytes1)
             && context.HttpContext.Session.TryGetValue("firstName", out byte[] sessionBytes2)
             && context.HttpContext.Session.TryGetValue("lastName", out byte[] sessionBytes3) ? true : false;
-
-    
-    
-    
-
 }
 <!DOCTYPE html>
 <html lang="en">

@@ -1,41 +1,38 @@
 ﻿@model Restauracja.ViewModels.LoginViewModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Logowanie";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Logowanie</h1>
 
-<h4>User</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Login">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+<br />
+
+<h2 class="admin_label mb-3">Logowanie</h2>
+
+<form asp-action="Login">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <div class="mb-3">
+        <label asp-for="Email" class="control-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+    <div class="mb-3">
+        <label asp-for="Password" class="control-label">Hasło</label>
+        <input asp-for="Password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <input type="submit" value="Zaloguj się" class="btn btn-success" />
+    </div>
+    
+</form>
+<div class="mb-3">
+    <a asp-controller="Users" asp-action="Create"><input type="submit" value="Zarejestruj się" class="btn btn-primary" /></a>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
