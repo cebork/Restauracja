@@ -72,6 +72,18 @@ nav {
     width: 50%;
 }
 
+.user_table {
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
+
+.btn_maximize_size {
+    margin-top: 4px;
+    width: 100%
+}
+
+
 a {
     text-decoration: none;
     color: coral;

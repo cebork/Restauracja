@@ -47,7 +47,9 @@ namespace Restauracja.DBSeeding
                             Address = "Address",
                             PhoneNumber = "000000000",
                             PasswordHash = passwordHasher.HashPassword(null, "admin"),
-                            RoleId = 2
+                            ActivationCode = "Admin123",
+                            RoleId = 2,
+                            IsActive = true
 
                         },
                         new User
@@ -60,7 +62,9 @@ namespace Restauracja.DBSeeding
                             Address = "User",
                             PhoneNumber = "000000001",
                             PasswordHash = passwordHasher.HashPassword(null, "user"),
-                            RoleId = 1
+                            ActivationCode = "User123",
+                            RoleId = 1,
+                            IsActive = true
                         }
                     );
                 }

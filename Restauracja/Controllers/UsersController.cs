@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
+using System.Net;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Restauracja.Data;
 using Restauracja.Models;
 using Restauracja.ViewModels;
+using Restauracja.Services;
 
 namespace Restauracja.Controllers
 {
@@ -17,19 +20,27 @@ namespace Restauracja.Controllers
     {
         private readonly RestauracjaContext _context;
         private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IUserService _userService;
 
-        public UsersController(RestauracjaContext context, IHttpContextAccessor contextAccessor)
+        public UsersController(RestauracjaContext context, IHttpContextAccessor contextAccessor, IUserService userService)
         {
             _context = context;
             _contextAccessor = contextAccessor;
+            _userService = userService;
         }
 
         // GET: Users
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-              return _context.User != null ? 
-                          View(await _context.User.ToListAsync()) :
-                          Problem("Entity set 'RestauracjaContext.User'  is null.");
+            if (_context.Dish != null)
+            {
+                PaginationViewModel<User> viewModel = await _userService.FillPaginationViewModelAsync(page);
+                return View(viewModel);
+            }
+            else
+            {
+                return Problem("Entity set 'RestauracjaContext.Dish'  is null.");
+            }
         }
 
         // GET: Users/Details/5
@@ -103,10 +114,45 @@ namespace Restauracja.Controllers
             {
                 _context.Add(user);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var smtpClient = new SmtpClient("smtp.gmail.com")
+                {
+                    Port = 587,
+                    Credentials = new NetworkCredential("restauracjarestauracja658@gmail.com", "nawxtadxbtwwuxwa"),
+                    EnableSsl = true,
+                };
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress("restauracjarestauracja658@gmail.com"),
+                    Subject = "Link aktywacyjny",
+                    Body = "<h1>Witaj oto twój link aktywacyjny: <br/>" +
+                    "</h1>" +
+                    "<a href='https://localhost:7015/Users/Activation?activationCode=" + user.ActivationCode + "'>Aktywuj konto</a>",
+                    IsBodyHtml = true,
+                };
+                mailMessage.To.Add(user.Email);
+
+                smtpClient.Send(mailMessage);
+                return RedirectToAction("RegisterSuccess", "Users");
             }
             return View(userVM);
         }
+
+        public IActionResult Activation(string activationCode)
+        {
+            var user = _context.User.ToList().Find(u => u.ActivationCode == activationCode);
+            if (user != null)
+            {
+                user.IsActive = true;
+                _context.Update(user);
+                _context.SaveChanges();
+            }
+            return View();
+        }
+        public IActionResult RegisterSuccess()
+        {
+            return View();
+        }
+
 
         // GET: Users/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -214,24 +260,32 @@ namespace Restauracja.Controllers
                 .Include(r => r.Role)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Email == loginVM.Email);
-            
-            if (user != null )
+
+            if (user != null)
             {
-                var passwordHasher = new PasswordHasher<User>();
-                var passwordVerificationResult = passwordHasher.VerifyHashedPassword(null, user.PasswordHash, loginVM.Password);
-                if (passwordVerificationResult == PasswordVerificationResult.Success)
+                if (user.IsActive)
                 {
-                    _contextAccessor.HttpContext.Session.SetString("role", user.Role.Name);
-                    _contextAccessor.HttpContext.Session.SetString("firstName", user.FirstName);
-                    _contextAccessor.HttpContext.Session.SetString("lastName", user.LastName);
-                    _contextAccessor.HttpContext.Session.SetInt32("userID", user.UserId);
-                    return RedirectToAction("Index", "Home");
+                    var passwordHasher = new PasswordHasher<User>();
+                    var passwordVerificationResult = passwordHasher.VerifyHashedPassword(null, user.PasswordHash, loginVM.Password);
+                    if (passwordVerificationResult == PasswordVerificationResult.Success)
+                    {
+                        _contextAccessor.HttpContext.Session.SetString("role", user.Role.Name);
+                        _contextAccessor.HttpContext.Session.SetString("firstName", user.FirstName);
+                        _contextAccessor.HttpContext.Session.SetString("lastName", user.LastName);
+                        _contextAccessor.HttpContext.Session.SetInt32("userID", user.UserId);
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Hasło jest błędne");
+                    }
                 }
                 else
                 {
-                    ModelState.AddModelError("", "Hasło jest błędne");
+                    ModelState.AddModelError("", "Konto nie zostało aktywowane");
                 }
-                
+
+
             }
             else
             {
@@ -254,5 +308,11 @@ namespace Restauracja.Controllers
         {
             return View();
         }
+
+        //public IActionResult ActivateOrDeactivateUser(int userID)
+        //{
+        //    Console.WriteLine(userID);
+        //    return RedirectToAction("Index", "Users");
+        //}
     }
 }
