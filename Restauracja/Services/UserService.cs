@@ -12,7 +12,8 @@ namespace Restauracja.Services
         bool CheckIfLoggedIn();
         bool CheckIfAdmin();
         Task<PaginationViewModel<User>> FillPaginationViewModelAsync(int page);
-        //void ActivateOrDeactivateUser();
+        void ActivateOrDeactivateUser(int userID);
+        void ChangeRole(int userID);
     }
     public class UserService : IUserService
     {
@@ -76,10 +77,26 @@ namespace Restauracja.Services
             return viewModel;
         }
 
-        //public void ActivateOrDeactivateUser()
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public void ActivateOrDeactivateUser(int userID)
+        {
+            User user = _context.User.Find(userID);
+            if (user != null)
+            {
+                user.IsActive = !user.IsActive;
+                _context.Update(user);
+                _context.SaveChanges();
+            }
+        }
 
+        public void ChangeRole(int userID)
+        {
+            User user = _context.User.Find(userID);
+            if (user != null)
+            {
+                user.RoleId = user.RoleId == 1 ? 2 : 1;
+                _context.Update(user);
+                _context.SaveChanges();
+            }
+        }
     }
 }

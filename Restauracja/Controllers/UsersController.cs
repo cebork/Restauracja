@@ -175,15 +175,26 @@ namespace Restauracja.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("UserId,Email,FirstName,LastName,City,PostalCode,Address,PhoneNumber,PasswordHash")] User user)
+        public async Task<IActionResult> Edit(int id, [Bind("RoleId,Email,PasswordHash,ActivationCode,UserId,FirstName,LastName,City,PostalCode,Address,PhoneNumber")] User user)
         {
+            //Console.WriteLine(id);
+            //Console.WriteLine();
             if (id != user.UserId)
             {
                 return NotFound();
             }
 
+            foreach (var item in ModelState.Values)
+            {
+                foreach (var item2 in item.Errors)
+                {
+                    Console.WriteLine(item2.ErrorMessage);
+                }
+            }
+
             if (ModelState.IsValid)
             {
+                user.IsActive = true;
                 try
                 {
                     _context.Update(user);
@@ -200,7 +211,7 @@ namespace Restauracja.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Details", new {id = user.UserId});
             }
             return View(user);
         }
@@ -309,10 +320,16 @@ namespace Restauracja.Controllers
             return View();
         }
 
-        //public IActionResult ActivateOrDeactivateUser(int userID)
-        //{
-        //    Console.WriteLine(userID);
-        //    return RedirectToAction("Index", "Users");
-        //}
+        public IActionResult ActivateOrDeactivateUser(int id)
+        {
+            _userService.ActivateOrDeactivateUser(id);
+            return RedirectToAction("Index", "Users");
+        }
+
+        public IActionResult ChangeRole(int id)
+        {
+            _userService.ChangeRole(id);
+            return RedirectToAction("Index", "Users");
+        }
     }
 }

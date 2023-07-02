@@ -1,5 +1,11 @@
 ﻿@inject IHttpContextAccessor context;
 @{
+    int userID = 0;
+    context.HttpContext.Session.TryGetValue("userID", out byte[] userIDBytes);
+    if (userIDBytes != null && userIDBytes.Length > 0)
+    {
+        userID = (int)context.HttpContext.Session.GetInt32("userID");
+    }
     string role = context.HttpContext.Session.GetString("role");
     string firstName = context.HttpContext.Session.GetString("firstName");
     string lastName = context.HttpContext.Session.GetString("lastName");
@@ -29,7 +35,7 @@
                     @if (isLoggedIn)
                     {
                         <li class="naav nav-item mask navi">
-                            <a class="nav-link text-white" aria-current="page">Zamówienia</a>
+                            <a class="nav-link text-white" aria-current="page" asp-area="" asp-controller="Orders" asp-action="Index">Zamówienia</a>
                         </li>
                         @if(role == "Admin")
                         {
@@ -47,7 +53,7 @@
                             </li>
                         }
                         <li class="naav nav-item mask navi">
-                            <a class="nav-link text-white" aria-current="page" >JA</a>
+                            <a class="nav-link text-white" aria-current="page" asp-area="" asp-controller="Users" asp-action="Details" asp-route-id="@userID">JA</a>
                         </li>
                     }
                 </ul>
