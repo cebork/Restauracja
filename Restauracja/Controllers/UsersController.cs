@@ -30,11 +30,11 @@ namespace Restauracja.Controllers
         }
 
         // GET: Users
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> Index(string searchString, int page = 1)
         {
             if (_context.Dish != null)
             {
-                PaginationViewModel<User> viewModel = await _userService.FillPaginationViewModelAsync(page);
+                PaginationViewModel<User> viewModel = await _userService.FillPaginationViewModelAsync(page, searchString);
                 return View(viewModel);
             }
             else

@@ -8,7 +8,7 @@ namespace Restauracja.Services
     public interface IDishService
     {
         Task<CreateDishViewModel> FillCreateDishViewModelForSaveAsync(CreateDishViewModel createDishViewModel);
-        Task<PaginationViewModel<Dish>> FillPaginationViewModelAsync(int page);
+        Task<PaginationViewModel<Dish>> FillPaginationViewModelAsync(int page, string searchString, long minPrice, long maxPrice, string categoryName);
         Task<Dish> GetDishByIdAsync(long? id);
         Task<CreateDishViewModel> FillCreateDishViewModelForDisplayAsync();
         Task<CreateDishViewModel> FillCreateDishViewModelForDisplayEditFormAsync(long? id, Dish dish);
@@ -168,9 +168,11 @@ namespace Restauracja.Services
             return createDishViewModel;
         }
 
-        public async Task<PaginationViewModel<Dish>> FillPaginationViewModelAsync(int page)
+        public async Task<PaginationViewModel<Dish>> FillPaginationViewModelAsync(int page, string searchString, long minPrice, long maxPrice, string categoryName)
         {
-            List<Dish> dishes = await _context.Dish.ToListAsync();
+            List<Dish> dishes = await _context.Dish
+                .Include(d => d.Category)
+                .ToListAsync();
             int pageSize = 10;
             int totalItems = dishes.Count();
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
@@ -182,10 +184,34 @@ namespace Restauracja.Services
             {
                 page = totalPages;
             }
-            List<Dish> pagedDishes = dishes.OrderBy(i => i.DishID)
+            List<Dish> pagedDishes;
+            if (searchString != null)
+            {
+                pagedDishes = dishes.OrderBy(i => i.DishID).Where(d => d.Name.Contains(searchString))
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
+            }
+            else
+            {
+                pagedDishes = dishes.OrderBy(i => i.DishID)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+            }
+            if (minPrice != 0)
+            {
+                pagedDishes = pagedDishes.Where(d => d.Price >= minPrice).ToList();
+            }
+            if (maxPrice != long.MaxValue)
+            {
+                pagedDishes = pagedDishes.Where(d => d.Price <= maxPrice).ToList();
+            }
+
+            if (categoryName != null)
+            {
+                pagedDishes = pagedDishes.Where(d => d.Category.Name == categoryName).ToList();
+            }
 
             var viewModel = new PaginationViewModel<Dish>
             {
@@ -193,7 +219,10 @@ namespace Restauracja.Services
                 CurrentPage = page,
                 PageSize = pageSize,
                 TotalItems = totalItems,
-                TotalPages = totalPages
+                TotalPages = totalPages,
+                DropdownValues = new SelectList(_context.Dish.Include(d => d.Category).ToList().Select(d => d.Category.Name ).ToList().Distinct().ToList()),
+                SelectedValue = categoryName
+                
             };
             return viewModel;
         }

@@ -11,7 +11,7 @@ namespace Restauracja.Services
         bool checkIfSessionIsSet();
         bool CheckIfLoggedIn();
         bool CheckIfAdmin();
-        Task<PaginationViewModel<User>> FillPaginationViewModelAsync(int page);
+        Task<PaginationViewModel<User>> FillPaginationViewModelAsync(int page, string searchString);
         void ActivateOrDeactivateUser(int userID);
         void ChangeRole(int userID);
         int GetUserId();
@@ -46,7 +46,7 @@ namespace Restauracja.Services
                 && _contextAccessor.HttpContext.Session.GetString("role") == "Admin";
         }
 
-        public async Task<PaginationViewModel<User>> FillPaginationViewModelAsync(int page)
+        public async Task<PaginationViewModel<User>> FillPaginationViewModelAsync(int page, string searchString)
         {
             List<User> users = await _context.User
                 .Include(u => u.Role)
@@ -62,10 +62,22 @@ namespace Restauracja.Services
             {
                 page = totalPages;
             }
-            List<User> pagedUsers = users.OrderBy(i => i.UserId)
+
+            List<User> pagedUsers;
+            if (searchString != null)
+            {
+                pagedUsers = users.OrderBy(i => i.UserId).Where(d => d.Email.Contains(searchString) || d.FirstName.Contains(searchString) || d.LastName.Contains(searchString) || d.City.Contains(searchString))
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
+            }
+            else
+            {
+                pagedUsers = users.OrderBy(i => i.UserId)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+            }
 
             var viewModel = new PaginationViewModel<User>
             {

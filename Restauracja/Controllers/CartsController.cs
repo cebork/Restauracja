@@ -17,27 +17,36 @@ namespace Restauracja.Controllers
     {
         private readonly RestauracjaContext _context;
         private readonly ICartService _cartService;
-        public CartsController(RestauracjaContext context, ICartService cartService)
+        private readonly IUserService _userService;
+        public CartsController(RestauracjaContext context, ICartService cartService, IUserService userService)
         {
             _cartService = cartService;
             _context = context;
+            _userService = userService;
         }
 
 
         // GET: Carts
         public async Task<IActionResult> Index()
         {
+            if (_userService.CheckIfLoggedIn())
+            {
+                return View(_cartService.getCurrentUserCart().ToList());
+            }
             
-            
-            return View(_cartService.getCurrentUserCart().ToList());
+            return RedirectToAction("AccessDenied", "Users");
         }
 
 
         [HttpPost]
         public IActionResult ToCart(long dish, int amount)
         {
-            _cartService.AddElementToCart(dish, amount);
-            return RedirectToAction("Index", "Carts");
+            if (_userService.CheckIfLoggedIn())
+            {
+                _cartService.AddElementToCart(dish, amount);
+                return RedirectToAction("Index", "Carts");
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
 
 

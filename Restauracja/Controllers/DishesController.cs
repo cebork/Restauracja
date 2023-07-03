@@ -25,11 +25,11 @@ namespace Restauracja.Controllers
         }
 
         // GET: Dishes
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> Index(string categoryName, string searchString, long minPrice = 0 , long maxPrice = long.MaxValue, int page = 1 )
         {
             if (_context.Dish != null)
             {
-                PaginationViewModel<Dish> viewModel = await _dishService.FillPaginationViewModelAsync(page);
+                PaginationViewModel<Dish> viewModel = await _dishService.FillPaginationViewModelAsync(page, searchString, minPrice, maxPrice, categoryName);
                 return View(viewModel);
             }
             else

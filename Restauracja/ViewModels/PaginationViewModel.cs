@@ -1,4 +1,6 @@
-﻿namespace Restauracja.ViewModels
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace Restauracja.ViewModels
 {
     public class PaginationViewModel<T>
     {
@@ -7,5 +9,8 @@
         public int PageSize { get; set; }
         public int TotalItems { get; set; }
         public int TotalPages { get; set; }
+
+        public SelectList? DropdownValues { get; set; }
+        public string? SelectedValue { get; set; } 
     }
 }
