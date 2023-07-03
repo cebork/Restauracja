@@ -28,5 +28,6 @@ namespace Restauracja.Models
         public virtual Role? Role { get; set; }
         public virtual ICollection<Cart>? Carts { get; set; }
         public virtual ICollection<Order>? Orders { get; set; }
+        public virtual ICollection<Favourites>? Favourites { get; set; }
     }
 }

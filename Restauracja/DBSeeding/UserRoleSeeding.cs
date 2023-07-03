@@ -39,7 +39,7 @@ namespace Restauracja.DBSeeding
                     context.User.AddRange(
                         new User
                         {
-                            Email = "Admin@Admin.Admin",
+                            Email = "admin",
                             FirstName = "Admin",
                             LastName = "Admin",
                             City = "City",
@@ -54,7 +54,7 @@ namespace Restauracja.DBSeeding
                         },
                         new User
                         {
-                            Email = "User@User.User",
+                            Email = "user",
                             FirstName = "User",
                             LastName = "User",
                             City = "User",

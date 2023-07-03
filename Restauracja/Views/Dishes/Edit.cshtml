@@ -50,7 +50,7 @@
     </div>
     <div class="mb-3 admin_label">
         <label class="form-check-label">Kategoria</label>
-        <select name="category" class="form-select" asp-for="Dish.Category" asp-items="Model.CategoryViewModel.Categories">
+        <select name="category" class="form-select" asp-for="Dish.Category">
             <option value="" disabled>Wybierz opcje</option>
             @foreach (var category in Model.CategoryViewModel.Categories)
             {

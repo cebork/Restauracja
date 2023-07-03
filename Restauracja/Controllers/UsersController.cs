@@ -304,7 +304,7 @@ namespace Restauracja.Controllers
 
         public IActionResult Logout()
         {
-            if (!_userService.CheckIfLoggedIn())
+            if (_userService.CheckIfLoggedIn())
             {
                 HttpContext.Session.Remove("role");
                 HttpContext.Session.Remove("firstName");
@@ -325,6 +325,12 @@ namespace Restauracja.Controllers
             if (_userService.CheckIfAdmin())
             {
                 _userService.ActivateOrDeactivateUser(id);
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+
+                    return Json(_context.User);
+                }
+                
                 return RedirectToAction("Index", "Users");
             }
             return RedirectToAction("AccessDenied", "Users");
@@ -335,6 +341,10 @@ namespace Restauracja.Controllers
             if (_userService.CheckIfAdmin())
             {
                 _userService.ChangeRole(id);
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(_context.User);
+                }
                 return RedirectToAction("Index", "Users");
             }
             return RedirectToAction("AccessDenied", "Users");

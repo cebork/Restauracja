@@ -4,134 +4,197 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<section>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="d-flex justify-content-center">
-                <h1 class="welcom_on_page">Użytkownicy</h1>
-            </div>
+<html>
+<div class="container-fluid">
+    <div class="row">
+        <div class="d-flex justify-content-center">
+            <h1 class="welcom_on_page">Użytkownicy</h1>
         </div>
-        <form asp-action="Index" method="get">
-            <div class="mb-3">
-                <label class="form-label admin_label">Fraza</label>
-                <input class="form-control" value="@Context.Request.Query["searchString"]" type="text" name="searchString" />
-            </div>
-            <div class="d-flex justify-content-center">
-                <button type="submit" class="btn btn-success add-button">Szukaj</button>
-            </div>
-        </form>
-        <div class="row">
-            <div class="d-flex justify-content-center user_table">
-                @if (Model.Items.Count > 0)
-                {
-                    <table class="table table-striped table-dark">
-                        <thead>
-                            <tr>
-                                <th>Email</th>
-                                <th>Imie</th>
-                                <th>Nazwisko</th>
-                                <th>Nr tel</th>
-                                <th>Kod pocztowy</th>
-                                <th>Miasto</th>
-                                <th>Adres</th>
-                                <th>Akcje</th>
+    </div>
+    <form asp-action="Index" method="get">
+        <div class="mb-3">
+            <label class="form-label admin_label">Fraza</label>
+            <input class="form-control" value="@Context.Request.Query["searchString"]" type="text" name="searchString" />
+        </div>
+        <div class="d-flex justify-content-center">
+            <button type="submit" class="btn btn-success add-button">Szukaj</button>
+        </div>
+    </form>
+    <div class="row">
+        <div class="d-flex justify-content-center user_table">
+            @if (Model.Items.Count > 0)
+            {
+                <table class="table table-striped table-dark">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Imie</th>
+                            <th>Nazwisko</th>
+                            <th>Nr tel</th>
+                            <th>Kod pocztowy</th>
+                            <th>Miasto</th>
+                            <th>Adres</th>
+                            <th>Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr class="dish-tr">
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Email)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.FirstName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.LastName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.PhoneNumber)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.PostalCode)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.City)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Address)
+                                </td>
+                                <td>
+                                    @if (item.Role.Name == "Admin")
+                                    {
+                                        <button value="@item.UserId" class="changebtn btn btn-danger">Degraduj do roli użytkownika</button>
+                                    }
+                                    else
+                                    {
+                                        <button value="@item.UserId" class="changebtn btn btn-success">Awansuj do roli administratora</button>
+                                    }
+
+                                    @if (item.IsActive)
+                                    {
+                                        <button value="@item.UserId" class="actbtn btn btn-danger btn_maximize_size">Deaktywuj</button>
+                                    }
+                                    else
+                                    {
+                                        <button value="@item.UserId" class="actbtn btn btn-success btn_maximize_size">Aktywuj</button>
+                                    }
+
+
+
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model.Items)
-                            {
-                                <tr class="dish-tr">
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Email)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.FirstName)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.LastName)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.PhoneNumber)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.PostalCode)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.City)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Address)
-                                    </td>
-                                    <td>
-                                        @if (item.Role.Name == "Admin")
-                                        {
-                                            <a asp-action="ChangeRole" asp-route-id="@item.UserId"><button class="btn btn-danger">Degraduj do roli użytkownika</button></a>
-                                        }
-                                        else
-                                        {
-                                            <a asp-action="ChangeRole" asp-route-id="@item.UserId"><button class="btn btn-success">Awansuj do roli administratora</button></a>
-                                        }
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="text-white"><h2>Lista jest pusta</h2></div>
+            }
 
-                                        @if (item.IsActive)
-                                        {
-                                            <a asp-action="ActivateOrDeactivateUser" asp-route-id="@item.UserId"><button class="btn btn-danger btn_maximize_size">Deaktywuj</button></a>
-                                        }
-                                        else
-                                        {
-                                            <a asp-action="ActivateOrDeactivateUser" asp-route-id="@item.UserId"><button class="btn btn-success btn_maximize_size">Aktywuj</button></a>
-                                        }
-
-
-
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                }
-                else
-                {
-                    <div class="text-white"><h2>Lista jest pusta</h2></div>
-                }
-
-            </div>
         </div>
-        @if (Model.Items.Count > 0)
-        {
-            <div class="row">
-                <div>
-                    <div class="d-flex justify-content-center admin_dishes">
-                        <p>
-                            <a href="@Url.Action("Index", new {
-                                page = 0,
-                                searchString = Context.Request.Query["searchString"]
-                                })">
-                                <button class="btn btn-primary">@("<<")</button>
-                            </a>
-                            <a href="@Url.Action("Index", new {
-                                page = Model.CurrentPage - 1,
-                                searchString = Context.Request.Query["searchString"]
-                                })">
-                                <button class="btn btn-primary">@("<")</button>
-                            </a>
-                            <button class="btn btn-primary" disabled>@Model.CurrentPage / @Model.TotalPages (@Model.Items.Count()) </button>
-                            <a href="@Url.Action("Index", new {
-                                page = Model.CurrentPage + 1,
-                                searchString = Context.Request.Query["searchString"]
-                                })">
-                                <button class="btn btn-primary">></button>
-                            </a>
-                            <a href="@Url.Action("Index", new {
-                                page = Model.TotalPages,
-                                searchString = Context.Request.Query["searchString"]
-                                })">
-                                <button class="btn btn-primary">>></button>
-                            </a>
-                        </p>
-                    </div>
+    </div>
+    @if (Model.Items.Count > 0)
+    {
+        <div class="row">
+            <div>
+                <div class="d-flex justify-content-center admin_dishes">
+                    <p>
+                        <a href="@Url.Action("Index", new {
+                            page = 0,
+                            searchString = Context.Request.Query["searchString"]
+                            })">
+                            <button class="btn btn-primary">@("<<")</button>
+                        </a>
+                        <a href="@Url.Action("Index", new {
+                            page = Model.CurrentPage - 1,
+                            searchString = Context.Request.Query["searchString"]
+                            })">
+                            <button class="btn btn-primary">@("<")</button>
+                        </a>
+                        <button class="btn btn-primary" disabled>@Model.CurrentPage / @Model.TotalPages (@Model.Items.Count()) </button>
+                        <a href="@Url.Action("Index", new {
+                            page = Model.CurrentPage + 1,
+                            searchString = Context.Request.Query["searchString"]
+                            })">
+                            <button class="btn btn-primary">></button>
+                        </a>
+                        <a href="@Url.Action("Index", new {
+                            page = Model.TotalPages,
+                            searchString = Context.Request.Query["searchString"]
+                            })">
+                            <button class="btn btn-primary">>></button>
+                        </a>
+                    </p>
                 </div>
             </div>
-        }
+        </div>
+        
+    }
+    
+</div>
+</html>
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $(document).on('click', ".actbtn", function () {
+                $.ajax({
+                    url: '@Url.Action("ActivateOrDeactivateUser", "Users")' + '/' + $(this).attr('value'),
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function() {
+                        $.ajax({
+                            url: '@Url.Action("Index", "Users")' + '@(Context.Request.QueryString)',
+                            type: 'GET',
+                            dataType: 'html',
+                            success: function (html) {
+                                // Replace the table body content with the updated HTML
+                                $('#userTableBody').html($(html).find('#userTableBody').html());
+                            },
+                            error: function (xhr, textStatus, errorThrown) {
+                                console.log('Error: ' + errorThrown);
+                            }
+                        });
+                    },
+                    error: function(xhr, textStatus, errorThrown) {
+                        console.log('Error: ' + errorThrown);
+                    }
+                });
+            });
+        });
 
-    </div>
-</section>
+        $(document).ready(function () {
+            $(document).on('click', ".changebtn", function () {
+                $.ajax({
+                    url: '@Url.Action("ChangeRole", "Users")' + '/' + $(this).attr('value'),
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function () {
+                        //console.log()
+                        $.ajax({
+                            url: '@Url.Action("Index", "Users")' + '@(Context.Request.QueryString)',
+                            type: 'GET',
+                            dataType: 'html',
+                            success: function (html) {
+                                // Replace the table body content with the updated HTML
+                                $('#userTableBody').html($(html).find('#userTableBody').html());
+                            },
+                            error: function (xhr, textStatus, errorThrown) {
+                                console.log('Error: ' + errorThrown);
+                            }
+                        });
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        console.log('Error: ' + errorThrown);
+                    }
+                });
+            });
+        });
+
+    </script>
+}
+
+
+

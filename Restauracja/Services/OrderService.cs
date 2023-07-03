@@ -45,7 +45,7 @@ namespace Restauracja.Services
             List<Order> orders = await _context.Order
                 .Include(o => o.User)
                 .ToListAsync();
-            int pageSize = 10;
+            int pageSize = 5;
             int totalItems = orders.Count();
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
             if (page < 1)
@@ -78,7 +78,7 @@ namespace Restauracja.Services
             List<Order> orders = await _context.Order
                 .Include(o => o.User)
                 .ToListAsync();
-            int pageSize = 10;
+            int pageSize = 5;
             int totalItems = orders.Count();
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
             if (page < 1)

@@ -24,6 +24,7 @@ namespace Restauracja.Data
         public DbSet<DishIngredient> DishIngredient { get; set; }
         public DbSet<Order> Order { get; set; }
         public DbSet<OrderContent> OrderContent { get; set; }
+        public DbSet<Favourites> Favorites { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,7 +35,6 @@ namespace Restauracja.Data
                     l => l.HasOne<Ingredient>().WithMany().HasForeignKey(e => e.IngredientID),
                     r => r.HasOne<Dish>().WithMany().HasForeignKey(e => e.DishID)
                 );
-
         }
     }
 }

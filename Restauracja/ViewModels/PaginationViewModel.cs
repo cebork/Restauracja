@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Restauracja.Models;
 
 namespace Restauracja.ViewModels
 {
@@ -12,5 +13,7 @@ namespace Restauracja.ViewModels
 
         public SelectList? DropdownValues { get; set; }
         public string? SelectedValue { get; set; } 
+
+        public List<Favourites>? Favourites { get; set; }
     }
 }

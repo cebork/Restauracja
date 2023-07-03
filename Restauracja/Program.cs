@@ -39,6 +39,7 @@ namespace Restauracja
                 CategorySeeding.Initialize(services);
                 IngredientSeeding.Initialize(services);
                 UserRoleSeeding.Initialize(services);
+                DishSeeding.Initialize(services);
             }
 
             // Configure the HTTP request pipeline.

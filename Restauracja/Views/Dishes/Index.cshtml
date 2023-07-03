@@ -67,7 +67,7 @@
                                 <th>Akcja</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="userTableBody">
                             @foreach (var item in Model.Items) {
                                 <tr class="dish-tr">
                                     <td class="dish-img-td">
@@ -113,6 +113,18 @@
                                                     <h3>Brak produktu</h3>
                                                 }
                                             </div>
+                                            @if (Model.Favourites.Any(f => f.DishID == item.DishID))
+                                            {
+                                                @*<a asp-action="RemoveFromFavourites" asp-route-id="@item.DishID">*@
+                                                <i value="@item.DishID" id="unlikebtn" class="fa fa-heart heartStyle"></i>
+                                                    @*</a>*@
+                                            }
+                                            else
+                                            {
+                                                @*<a asp-action="AddToFavourite" asp-route-id="@item.DishID">*@
+                                                    <i id="likebtn" value="@item.DishID" class="fa fa-heart-o heartStyle"></i>
+                                                    @*</a>*@
+                                            }       
                                         }
                                     </td>
                                 </tr>
@@ -176,5 +188,65 @@
             </div>
         }
         
+        
     </div>
 </section>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $(document).on('click', "#likebtn", function () {
+                $.ajax({
+                    url: '@Url.Action("AddToFavourite", "Dishes")' + '/' + $(this).attr('value'),
+                    type: 'GET',
+                    dataType: 'html',
+                    success: function (data) {
+                        $.ajax({
+                            url: '@Url.Action("Index", "Dishes")' + '@(Context.Request.QueryString)',
+                            type: 'GET',
+                            dataType: 'html',
+                            success: function (html) {
+                                // Replace the table body content with the updated HTML
+                                $('#userTableBody').html($(html).find('#userTableBody').html());
+                            },
+                            error: function (xhr, textStatus, errorThrown) {
+                                console.log('Error2: ' + errorThrown);
+                            }
+                        });
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        console.log('Error1: ' + errorThrown);
+                    }
+                });
+            });
+        });
+
+        $(document).ready(function () {
+            $(document).on('click', "#unlikebtn", function () {
+                $.ajax({
+                    url: '@Url.Action("RemoveFromFavourites", "Dishes")' + '/' + $(this).attr('value'),
+                    type: 'GET',
+                    dataType: 'html',
+                    success: function (data) {
+                        $.ajax({
+                            url: '@Url.Action("Index", "Dishes")' + '@(Context.Request.QueryString)',
+                            type: 'GET',
+                            dataType: 'html',
+                            success: function (html) {
+                                // Replace the table body content with the updated HTML
+                                $('#userTableBody').html($(html).find('#userTableBody').html());
+                            },
+                            error: function (xhr, textStatus, errorThrown) {
+                                console.log('Error2: ' + errorThrown);
+                            }
+                        });
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        console.log('Error1: ' + errorThrown);
+                    }
+                });
+            });
+        });
+
+    </script>
+}

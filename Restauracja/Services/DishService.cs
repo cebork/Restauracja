@@ -13,14 +13,20 @@ namespace Restauracja.Services
         Task<CreateDishViewModel> FillCreateDishViewModelForDisplayAsync();
         Task<CreateDishViewModel> FillCreateDishViewModelForDisplayEditFormAsync(long? id, Dish dish);
         Task<CreateDishViewModel> FillCreateDishViewModelForEditAsync(CreateDishViewModel createDishViewModel);
+        void AddToFavourites(int id);
+        void RemoveFromFavourites(int id);
     }
     public class DishService : IDishService
     {
         private readonly RestauracjaContext _context;
-        public DishService(RestauracjaContext restauracjaContext) 
+        private readonly IUserService _userService;
+        public DishService(RestauracjaContext restauracjaContext, IUserService userService) 
         {
             _context = restauracjaContext;
+            _userService = userService;
         }
+
+        
 
         public async Task<CreateDishViewModel> FillCreateDishViewModelForDisplayAsync()
         {
@@ -170,10 +176,16 @@ namespace Restauracja.Services
 
         public async Task<PaginationViewModel<Dish>> FillPaginationViewModelAsync(int page, string searchString, long minPrice, long maxPrice, string categoryName)
         {
+            int userID = 0;
+            if (_userService.checkIfSessionIsSet())
+            {
+                userID = _userService.GetUserId();
+            }
+            
             List<Dish> dishes = await _context.Dish
                 .Include(d => d.Category)
                 .ToListAsync();
-            int pageSize = 10;
+            int pageSize = 5;
             int totalItems = dishes.Count();
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
             if (page < 1)
@@ -184,17 +196,28 @@ namespace Restauracja.Services
             {
                 page = totalPages;
             }
-            List<Dish> pagedDishes;
+            List<Favourites> favourites = _context.Favorites.ToList();
+            List<Dish> pagedDishes = new List<Dish>();
+            if (favourites != null)
+            {
+                favourites = favourites.Where(f => f.UserId == userID).ToList();
+                pagedDishes.AddRange(dishes.Where(d => favourites.Any(f => f.DishID == d.DishID)));
+                pagedDishes.AddRange(dishes.Where(d => !favourites.Any(f => f.DishID == d.DishID)));
+            }
+            else
+            {
+                pagedDishes = dishes;
+            }
             if (searchString != null)
             {
-                pagedDishes = dishes.OrderBy(i => i.DishID).Where(d => d.Name.Contains(searchString))
+                pagedDishes = pagedDishes.Where(d => d.Name.Contains(searchString))
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
             }
             else
             {
-                pagedDishes = dishes.OrderBy(i => i.DishID)
+                pagedDishes = pagedDishes
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
@@ -213,6 +236,9 @@ namespace Restauracja.Services
                 pagedDishes = pagedDishes.Where(d => d.Category.Name == categoryName).ToList();
             }
 
+            
+            
+
             var viewModel = new PaginationViewModel<Dish>
             {
                 Items = pagedDishes,
@@ -221,8 +247,8 @@ namespace Restauracja.Services
                 TotalItems = totalItems,
                 TotalPages = totalPages,
                 DropdownValues = new SelectList(_context.Dish.Include(d => d.Category).ToList().Select(d => d.Category.Name ).ToList().Distinct().ToList()),
-                SelectedValue = categoryName
-                
+                SelectedValue = categoryName,
+                Favourites = favourites
             };
             return viewModel;
         }
@@ -234,6 +260,35 @@ namespace Restauracja.Services
                 .Include(i => i.Ingredients)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.DishID == id);
+        }
+        
+        public void AddToFavourites(int id)
+        {
+            int userID = _userService.GetUserId();
+
+            Favourites favourites = new Favourites()
+            {
+                UserId = userID,
+                DishID = id
+            };
+
+            _context.Favorites.Add(favourites);
+            _context.SaveChanges();
+        }
+
+        public void RemoveFromFavourites(int id)
+        {
+            int userID = _userService.GetUserId();
+
+            List<Favourites> favourites = _context.Favorites.ToList();
+            if (favourites != null)
+            {
+                Favourites favouriteToDelete = favourites.Where(f => f.DishID == id && f.UserId == userID).First();
+
+                _context.Favorites.Remove(favouriteToDelete);
+                _context.SaveChanges();
+            }
+            
         }
     }
 }

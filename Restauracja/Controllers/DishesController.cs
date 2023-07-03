@@ -174,9 +174,39 @@ namespace Restauracja.Controllers
             return RedirectToAction("AccessDenied", "Users");
         }
 
+        public IActionResult AddToFavourite(int id)
+        {
+            if (_userService.CheckIfLoggedIn())
+            {
+                _dishService.AddToFavourites(id);
+                //if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                //{
+                //    return Json(_context.Dish);
+                //}
+                return RedirectToAction("Index", "Dishes");
+            }
+            return RedirectToAction("AccessDenied", "Users");
+        }
+
+        public IActionResult RemoveFromFavourites(int id)
+        {
+            if (_userService.CheckIfLoggedIn())
+            {
+                _dishService.RemoveFromFavourites(id);
+                //if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                //{
+                //    return Json(_context.Dish);
+                //}
+                return RedirectToAction("Index", "Dishes");
+            }
+            return RedirectToAction("AccessDenied", "Users");
+        }
+
         private bool DishExists(long id)
         {
           return (_context.Dish?.Any(e => e.DishID == id)).GetValueOrDefault();
         }
+
+
     }
 }

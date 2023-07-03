@@ -19,6 +19,7 @@ namespace Restauracja.Models
 
         public virtual ICollection<Cart>? Carts { get; set; }
         public virtual ICollection<OrderContent>? OrderContents { get; set; }
+        public virtual ICollection<Favourites>? Favourites { get; set; }
 
     }
 }

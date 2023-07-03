@@ -176,3 +176,15 @@ a {
     margin: auto;
     width: 50%;
 }
+
+.heartStyle {
+    font-size: 48px;
+    color: red;
+    float: right;
+}
+
+.heartStyle:hover {
+    color: gold;
+    transition: all 0.5s;
+    cursor: pointer;
+}
