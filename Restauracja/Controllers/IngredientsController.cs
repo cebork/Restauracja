@@ -7,48 +7,42 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Restauracja.Data;
 using Restauracja.Models;
+using Restauracja.Services;
 
 namespace Restauracja.Controllers
 {
     public class IngredientsController : Controller
     {
         private readonly RestauracjaContext _context;
-
-        public IngredientsController(RestauracjaContext context)
+        private readonly IUserService _userService;
+        public IngredientsController(RestauracjaContext context, IUserService userService)
         {
             _context = context;
+            _userService = userService;
         }
 
         // GET: Ingredients
         public async Task<IActionResult> Index()
         {
-              return _context.Ingredient != null ? 
+            if (_userService.CheckIfAdmin())
+            {
+                return _context.Ingredient != null ?
                           View(await _context.Ingredient.ToListAsync()) :
                           Problem("Entity set 'RestauracjaContext.Ingredient'  is null.");
-        }
-
-        // GET: Ingredients/Details/5
-        public async Task<IActionResult> Details(long? id)
-        {
-            if (id == null || _context.Ingredient == null)
-            {
-                return NotFound();
             }
+              
 
-            var ingredient = await _context.Ingredient
-                .FirstOrDefaultAsync(m => m.IngredientID == id);
-            if (ingredient == null)
-            {
-                return NotFound();
-            }
-
-            return View(ingredient);
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         // GET: Ingredients/Create
         public IActionResult Create()
         {
-            return View();
+            if (_userService.CheckIfAdmin())
+            {
+                return View();
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         // POST: Ingredients/Create
@@ -58,82 +52,40 @@ namespace Restauracja.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IngredientID,Name,IsDeleted")] Ingredient ingredient)
         {
-            if (ModelState.IsValid)
+            if (_userService.CheckIfAdmin())
             {
-                _context.Add(ingredient);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(ingredient);
-        }
-
-        // GET: Ingredients/Edit/5
-        public async Task<IActionResult> Edit(long? id)
-        {
-            if (id == null || _context.Ingredient == null)
-            {
-                return NotFound();
-            }
-
-            var ingredient = await _context.Ingredient.FindAsync(id);
-            if (ingredient == null)
-            {
-                return NotFound();
-            }
-            return View(ingredient);
-        }
-
-        // POST: Ingredients/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("IngredientID,Name,IsDeleted")] Ingredient ingredient)
-        {
-            if (id != ingredient.IngredientID)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                if (ModelState.IsValid)
                 {
-                    _context.Update(ingredient);
+                    _context.Add(ingredient);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!IngredientExists(ingredient.IngredientID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                return View(ingredient);
             }
-            return View(ingredient);
+            return RedirectToAction("AccessDenied", "Users");
         }
+
 
         // GET: Ingredients/Delete/5
         public async Task<IActionResult> Delete(long? id)
         {
-            if (id == null || _context.Ingredient == null)
+            if (_userService.CheckIfAdmin())
             {
-                return NotFound();
-            }
+                if (id == null || _context.Ingredient == null)
+                {
+                    return NotFound();
+                }
 
-            var ingredient = await _context.Ingredient
-                .FirstOrDefaultAsync(m => m.IngredientID == id);
-            if (ingredient == null)
-            {
-                return NotFound();
-            }
+                var ingredient = await _context.Ingredient
+                    .FirstOrDefaultAsync(m => m.IngredientID == id);
+                if (ingredient == null)
+                {
+                    return NotFound();
+                }
 
-            return View(ingredient);
+                return View(ingredient);
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         // POST: Ingredients/Delete/5
@@ -141,18 +93,22 @@ namespace Restauracja.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(long id)
         {
-            if (_context.Ingredient == null)
+            if (_userService.CheckIfAdmin())
             {
-                return Problem("Entity set 'RestauracjaContext.Ingredient'  is null.");
+                if (_context.Ingredient == null)
+                {
+                    return Problem("Entity set 'RestauracjaContext.Ingredient'  is null.");
+                }
+                var ingredient = await _context.Ingredient.FindAsync(id);
+                if (ingredient != null)
+                {
+                    _context.Ingredient.Remove(ingredient);
+                }
+
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
-            var ingredient = await _context.Ingredient.FindAsync(id);
-            if (ingredient != null)
-            {
-                _context.Ingredient.Remove(ingredient);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         private bool IngredientExists(long id)

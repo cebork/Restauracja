@@ -60,6 +60,7 @@ namespace Restauracja
             app.UseSession();
 
             app.UseAuthorization();
+            app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
             app.MapControllerRoute(
                 name: "default",

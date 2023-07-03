@@ -50,146 +50,31 @@ namespace Restauracja.Controllers
         }
 
 
-
-        // GET: Carts/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.Cart == null)
-            {
-                return NotFound();
-            }
-
-            var cart = await _context.Cart
-                .Include(c => c.Dish)
-                .Include(c => c.User)
-                .FirstOrDefaultAsync(m => m.CartId == id);
-            if (cart == null)
-            {
-                return NotFound();
-            }
-
-            return View(cart);
-        }
-
-        // GET: Carts/Create
-        public IActionResult Create()
-        {
-            ViewData["DishID"] = new SelectList(_context.Dish, "DishID", "DishID");
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId");
-            return View();
-        }
-
-        // POST: Carts/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CartId,Amount,DishID,UserId")] Cart cart)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(cart);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["DishID"] = new SelectList(_context.Dish, "DishID", "DishID", cart.DishID);
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", cart.UserId);
-            return View(cart);
-        }
-
-        // GET: Carts/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _context.Cart == null)
-            {
-                return NotFound();
-            }
-
-            var cart = await _context.Cart.FindAsync(id);
-            if (cart == null)
-            {
-                return NotFound();
-            }
-            ViewData["DishID"] = new SelectList(_context.Dish, "DishID", "DishID", cart.DishID);
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", cart.UserId);
-            return View(cart);
-        }
-
-        // POST: Carts/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CartId,Amount,DishID,UserId")] Cart cart)
-        {
-            if (id != cart.CartId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(cart);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CartExists(cart.CartId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["DishID"] = new SelectList(_context.Dish, "DishID", "DishID", cart.DishID);
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", cart.UserId);
-            return View(cart);
-        }
+       
 
         // GET: Carts/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Cart == null)
+            if (_userService.CheckIfLoggedIn())
             {
-                return NotFound();
-            }
+                if (id == null || _context.Cart == null)
+                {
+                    return NotFound();
+                }
 
-            var cart = await _context.Cart
-                .Include(c => c.Dish)
-                .Include(c => c.User)
-                .FirstOrDefaultAsync(m => m.CartId == id);
-            if (cart != null)
-            {
-                _context.Cart.Remove(cart);
-            }
+                var cart = await _context.Cart
+                    .Include(c => c.Dish)
+                    .Include(c => c.User)
+                    .FirstOrDefaultAsync(m => m.CartId == id);
+                if (cart != null)
+                {
+                    _context.Cart.Remove(cart);
+                }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        // POST: Carts/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.Cart == null)
-            {
-                return Problem("Entity set 'RestauracjaContext.Cart'  is null.");
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
-            var cart = await _context.Cart.FindAsync(id);
-            if (cart != null)
-            {
-                _context.Cart.Remove(cart);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         private bool CartExists(int id)
@@ -199,8 +84,12 @@ namespace Restauracja.Controllers
 
         public IActionResult moveToOrders()
         {
-            _cartService.moveToOrders();
-            return RedirectToAction("Index", "Orders");
+            if (_userService.CheckIfLoggedIn())
+            {
+                _cartService.moveToOrders();
+                return RedirectToAction("Index", "Orders");
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
     }
 }

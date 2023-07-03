@@ -35,146 +35,43 @@ namespace Restauracja.Controllers
         // GET: Orders
         public async Task<IActionResult> Index(int page = 1)
         {
-            PaginationViewModel<Order> paginationViewModel = await _orderService.FillPaginationViewModelAsync(page);
-            return View(paginationViewModel);
+            if (_userService.CheckIfLoggedIn())
+            {
+                PaginationViewModel<Order> paginationViewModel = await _orderService.FillPaginationViewModelAsync(page);
+                return View(paginationViewModel);
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         public async Task<IActionResult> IndexAdmin(int page = 1)
         {
-            PaginationViewModel<Order> paginationViewModel = await _orderService.FillPaginationViewModelAdminAsync(page);
-            return View(paginationViewModel);
+            if (_userService.CheckIfAdmin())
+            {
+                PaginationViewModel<Order> paginationViewModel = await _orderService.FillPaginationViewModelAdminAsync(page);
+                return View(paginationViewModel);
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         // GET: Orders/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Order == null)
+            if (_userService.CheckIfLoggedIn())
             {
-                return NotFound();
-            }
-
-            var order = _orderService.GenerateFakturaData((int)id);
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            return View(order);
-        }
-
-        // GET: Orders/Create
-        public IActionResult Create()
-        {
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId");
-            return View();
-        }
-
-        // POST: Orders/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("OrderId,FullPrice,IsDelivered,UserId")] Order order)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(order);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", order.UserId);
-            return View(order);
-        }
-
-        // GET: Orders/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _context.Order == null)
-            {
-                return NotFound();
-            }
-
-            var order = await _context.Order.FindAsync(id);
-            if (order == null)
-            {
-                return NotFound();
-            }
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", order.UserId);
-            return View(order);
-        }
-
-        // POST: Orders/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("OrderId,FullPrice,IsDelivered,UserId")] Order order)
-        {
-            if (id != order.OrderId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                if (id == null || _context.Order == null)
                 {
-                    _context.Update(order);
-                    await _context.SaveChangesAsync();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
+
+                var order = _orderService.GenerateFakturaData((int)id);
+                if (order == null)
                 {
-                    if (!OrderExists(order.OrderId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    return NotFound();
                 }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", order.UserId);
-            return View(order);
-        }
 
-        // GET: Orders/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.Order == null)
-            {
-                return NotFound();
+                return View(order);
             }
-
-            var order = await _context.Order
-                .Include(o => o.User)
-                .FirstOrDefaultAsync(m => m.OrderId == id);
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            return View(order);
-        }
-
-        // POST: Orders/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.Order == null)
-            {
-                return Problem("Entity set 'RestauracjaContext.Order'  is null.");
-            }
-            var order = await _context.Order.FindAsync(id);
-            if (order != null)
-            {
-                _context.Order.Remove(order);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         private bool OrderExists(int id)
@@ -185,46 +82,57 @@ namespace Restauracja.Controllers
 
         public IActionResult GenerateFaktura(int id)
         {
-
-            List<OrderContent> model = _orderService.GenerateFakturaData(id);
-            var viewResult = _viewEngine.FindView(ControllerContext, "GenerateFaktura", false);
-            if (viewResult.Success) 
+            if (_userService.CheckIfLoggedIn())
             {
-                var viewData = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
+                List<OrderContent> model = _orderService.GenerateFakturaData(id);
+                if (model.Count > 0)
                 {
-                    Model = model
-                };
+                    var viewResult = _viewEngine.FindView(ControllerContext, "GenerateFaktura", false);
+                    if (viewResult.Success)
+                    {
+                        var viewData = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
+                        {
+                            Model = model
+                        };
 
-                using (var writer = new StringWriter())
-                {
-                    var viewContext = new ViewContext(
-                        ControllerContext,
-                        viewResult.View,
-                        viewData,
-                        new TempDataDictionary(ControllerContext.HttpContext, _tempDataProvider),
-                        writer,
-                        new HtmlHelperOptions()
-                    );
+                        using (var writer = new StringWriter())
+                        {
+                            var viewContext = new ViewContext(
+                                ControllerContext,
+                                viewResult.View,
+                                viewData,
+                                new TempDataDictionary(ControllerContext.HttpContext, _tempDataProvider),
+                                writer,
+                                new HtmlHelperOptions()
+                            );
 
-                    viewResult.View.RenderAsync(viewContext).GetAwaiter().GetResult();
-                    writer.Flush();
+                            viewResult.View.RenderAsync(viewContext).GetAwaiter().GetResult();
+                            writer.Flush();
 
-                    var htmlContent = writer.ToString();
+                            var htmlContent = writer.ToString();
 
-                    var renderer = new ChromePdfRenderer();
-                    var pdf = renderer.RenderHtmlAsPdf(htmlContent);
+                            var renderer = new ChromePdfRenderer();
+                            var pdf = renderer.RenderHtmlAsPdf(htmlContent);
 
-                    return File(pdf.BinaryData, "application/pdf", $"Faktura{model[0].OrderId}.pdf");
+                            return File(pdf.BinaryData, "application/pdf", $"Faktura{model[0].OrderId}.pdf");
 
+                        }
+                    }
                 }
+                return NotFound();
             }
-            return NotFound();
+            
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         public IActionResult ChangeStatus(int id)
         {
-            _orderService.ChangeStatus(id);
-            return RedirectToAction("IndexAdmin");
+            if (_userService.CheckIfAdmin())
+            {
+                _orderService.ChangeStatus(id);
+                return RedirectToAction("IndexAdmin");
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
     }
 }

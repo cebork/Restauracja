@@ -32,39 +32,52 @@ namespace Restauracja.Controllers
         // GET: Users
         public async Task<IActionResult> Index(string searchString, int page = 1)
         {
-            if (_context.Dish != null)
+            if (_userService.CheckIfAdmin())
             {
-                PaginationViewModel<User> viewModel = await _userService.FillPaginationViewModelAsync(page, searchString);
-                return View(viewModel);
+                if (_context.Dish != null)
+                {
+                    PaginationViewModel<User> viewModel = await _userService.FillPaginationViewModelAsync(page, searchString);
+                    return View(viewModel);
+                }
+                else
+                {
+                    return Problem("Entity set 'RestauracjaContext.Dish'  is null.");
+                }
             }
-            else
-            {
-                return Problem("Entity set 'RestauracjaContext.Dish'  is null.");
-            }
+            
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         // GET: Users/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.User == null)
+            if (_userService.CheckIfLoggedIn())
             {
-                return NotFound();
-            }
+                if (id == null || _context.User == null)
+                {
+                    return NotFound();
+                }
 
-            var user = await _context.User
-                .FirstOrDefaultAsync(m => m.UserId == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
+                var user = await _context.User
+                    .FirstOrDefaultAsync(m => m.UserId == id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
 
-            return View(user);
+                return View(user);
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         // GET: Users/Create
         public IActionResult Create()
         {
-            return View();
+            if (!_userService.CheckIfLoggedIn())
+            {
+                return View();
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         // POST: Users/Create
@@ -74,67 +87,72 @@ namespace Restauracja.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Email,FirstName,LastName,City,PostalCode,Address,PhoneNumber,Password")] UserViewModel userVM)
         {
-            var passwordHasher = new PasswordHasher<User>();
-            string hashedPassword = passwordHasher.HashPassword(null, userVM.Password);
-            User user = new User()
+            if (!_userService.CheckIfLoggedIn())
             {
-                Email = userVM.Email,
-                FirstName = userVM.FirstName,
-                LastName = userVM.LastName,
-                City = userVM.City,
-                PostalCode = userVM.PostalCode,
-                Address = userVM.Address,
-                PhoneNumber = userVM.PhoneNumber,
-                PasswordHash = hashedPassword,
-                ActivationCode = Guid.NewGuid().ToString()
-            };
-            user.Role = _context.Role.FindAsync(1).Result;
-
-            bool emailExists = _context.User.ToList().Where(u => u.Email == user.Email).Any();
-            bool phoneNumberExists = _context.User.ToList().Where(u => u.PhoneNumber == user.PhoneNumber).Any();
-
-            if (emailExists)
-            {
-                ModelState.AddModelError("", "Email jest zajęty");
-            }
-
-            if (phoneNumberExists)
-            {
-                ModelState.AddModelError("", "Numer telefonu jest zajęty");
-            }
-
-            foreach (var item in ModelState.Values)
-            {
-                foreach (var item2 in item.Errors)
+                var passwordHasher = new PasswordHasher<User>();
+                string hashedPassword = passwordHasher.HashPassword(null, userVM.Password);
+                User user = new User()
                 {
-                    Console.WriteLine(item2.ErrorMessage);
+                    Email = userVM.Email,
+                    FirstName = userVM.FirstName,
+                    LastName = userVM.LastName,
+                    City = userVM.City,
+                    PostalCode = userVM.PostalCode,
+                    Address = userVM.Address,
+                    PhoneNumber = userVM.PhoneNumber,
+                    PasswordHash = hashedPassword,
+                    ActivationCode = Guid.NewGuid().ToString()
+                };
+                user.Role = _context.Role.FindAsync(1).Result;
+
+                bool emailExists = _context.User.ToList().Where(u => u.Email == user.Email).Any();
+                bool phoneNumberExists = _context.User.ToList().Where(u => u.PhoneNumber == user.PhoneNumber).Any();
+
+                if (emailExists)
+                {
+                    ModelState.AddModelError("", "Email jest zajęty");
                 }
-            }
-            if (ModelState.IsValid)
-            {
-                _context.Add(user);
-                await _context.SaveChangesAsync();
-                var smtpClient = new SmtpClient("smtp.gmail.com")
-                {
-                    Port = 587,
-                    Credentials = new NetworkCredential("restauracjarestauracja658@gmail.com", "nawxtadxbtwwuxwa"),
-                    EnableSsl = true,
-                };
-                var mailMessage = new MailMessage
-                {
-                    From = new MailAddress("restauracjarestauracja658@gmail.com"),
-                    Subject = "Link aktywacyjny",
-                    Body = "<h1>Witaj oto twój link aktywacyjny: <br/>" +
-                    "</h1>" +
-                    "<a href='https://localhost:7015/Users/Activation?activationCode=" + user.ActivationCode + "'>Aktywuj konto</a>",
-                    IsBodyHtml = true,
-                };
-                mailMessage.To.Add(user.Email);
 
-                smtpClient.Send(mailMessage);
-                return RedirectToAction("RegisterSuccess", "Users");
+                if (phoneNumberExists)
+                {
+                    ModelState.AddModelError("", "Numer telefonu jest zajęty");
+                }
+
+                foreach (var item in ModelState.Values)
+                {
+                    foreach (var item2 in item.Errors)
+                    {
+                        Console.WriteLine(item2.ErrorMessage);
+                    }
+                }
+                if (ModelState.IsValid)
+                {
+                    _context.Add(user);
+                    await _context.SaveChangesAsync();
+                    var smtpClient = new SmtpClient("smtp.gmail.com")
+                    {
+                        Port = 587,
+                        Credentials = new NetworkCredential("restauracjarestauracja658@gmail.com", "nawxtadxbtwwuxwa"),
+                        EnableSsl = true,
+                    };
+                    var mailMessage = new MailMessage
+                    {
+                        From = new MailAddress("restauracjarestauracja658@gmail.com"),
+                        Subject = "Link aktywacyjny",
+                        Body = "<h1>Witaj oto twój link aktywacyjny: <br/>" +
+                        "</h1>" +
+                        "<a href='https://localhost:7015/Users/Activation?activationCode=" + user.ActivationCode + "'>Aktywuj konto</a>",
+                        IsBodyHtml = true,
+                    };
+                    mailMessage.To.Add(user.Email);
+
+                    smtpClient.Send(mailMessage);
+                    return RedirectToAction("RegisterSuccess", "Users");
+                }
+            
+                return View(userVM);
             }
-            return View(userVM);
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         public IActionResult Activation(string activationCode)
@@ -157,17 +175,21 @@ namespace Restauracja.Controllers
         // GET: Users/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.User == null)
+            if (_userService.CheckIfLoggedIn())
             {
-                return NotFound();
-            }
+                if (id == null || _context.User == null)
+                {
+                    return NotFound();
+                }
 
-            var user = await _context.User.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
+                var user = await _context.User.FindAsync(id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                return View(user);
             }
-            return View(user);
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         // POST: Users/Edit/5
@@ -177,80 +199,45 @@ namespace Restauracja.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("RoleId,Email,PasswordHash,ActivationCode,UserId,FirstName,LastName,City,PostalCode,Address,PhoneNumber")] User user)
         {
-            //Console.WriteLine(id);
-            //Console.WriteLine();
-            if (id != user.UserId)
+            if (_userService.CheckIfLoggedIn())
             {
-                return NotFound();
-            }
-
-            foreach (var item in ModelState.Values)
-            {
-                foreach (var item2 in item.Errors)
+                if (id != user.UserId)
                 {
-                    Console.WriteLine(item2.ErrorMessage);
+                    return NotFound();
                 }
-            }
 
-            if (ModelState.IsValid)
-            {
-                user.IsActive = true;
-                try
+                foreach (var item in ModelState.Values)
                 {
-                    _context.Update(user);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UserExists(user.UserId))
+                    foreach (var item2 in item.Errors)
                     {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
+                        Console.WriteLine(item2.ErrorMessage);
                     }
                 }
-                return RedirectToAction("Details", new {id = user.UserId});
-            }
-            return View(user);
-        }
 
-        // GET: Users/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.User == null)
-            {
-                return NotFound();
+                if (ModelState.IsValid)
+                {
+                    user.IsActive = true;
+                    try
+                    {
+                        _context.Update(user);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!UserExists(user.UserId))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                    return RedirectToAction("Details", new { id = user.UserId });
+                }
+                return View(user);
             }
-
-            var user = await _context.User
-                .FirstOrDefaultAsync(m => m.UserId == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
-        }
-
-        // POST: Users/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.User == null)
-            {
-                return Problem("Entity set 'RestauracjaContext.User'  is null.");
-            }
-            var user = await _context.User.FindAsync(id);
-            if (user != null)
-            {
-                _context.User.Remove(user);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         private bool UserExists(int id)
@@ -260,59 +247,72 @@ namespace Restauracja.Controllers
 
         public IActionResult Login()
         {
-            return View();
+            if (!_userService.CheckIfLoggedIn())
+            {
+                return View();
+            }
+            
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login([Bind("Email,Password")] LoginViewModel loginVM)
         {
-            User user = await _context.User
+            if (!_userService.CheckIfLoggedIn())
+            {
+                User user = await _context.User
                 .Include(r => r.Role)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Email == loginVM.Email);
 
-            if (user != null)
-            {
-                if (user.IsActive)
+                if (user != null)
                 {
-                    var passwordHasher = new PasswordHasher<User>();
-                    var passwordVerificationResult = passwordHasher.VerifyHashedPassword(null, user.PasswordHash, loginVM.Password);
-                    if (passwordVerificationResult == PasswordVerificationResult.Success)
+                    if (user.IsActive)
                     {
-                        _contextAccessor.HttpContext.Session.SetString("role", user.Role.Name);
-                        _contextAccessor.HttpContext.Session.SetString("firstName", user.FirstName);
-                        _contextAccessor.HttpContext.Session.SetString("lastName", user.LastName);
-                        _contextAccessor.HttpContext.Session.SetInt32("userID", user.UserId);
-                        return RedirectToAction("Index", "Home");
+                        var passwordHasher = new PasswordHasher<User>();
+                        var passwordVerificationResult = passwordHasher.VerifyHashedPassword(null, user.PasswordHash, loginVM.Password);
+                        if (passwordVerificationResult == PasswordVerificationResult.Success)
+                        {
+                            _contextAccessor.HttpContext.Session.SetString("role", user.Role.Name);
+                            _contextAccessor.HttpContext.Session.SetString("firstName", user.FirstName);
+                            _contextAccessor.HttpContext.Session.SetString("lastName", user.LastName);
+                            _contextAccessor.HttpContext.Session.SetInt32("userID", user.UserId);
+                            return RedirectToAction("Index", "Home");
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("", "Hasło jest błędne");
+                        }
                     }
                     else
                     {
-                        ModelState.AddModelError("", "Hasło jest błędne");
+                        ModelState.AddModelError("", "Konto nie zostało aktywowane");
                     }
+
+
                 }
                 else
                 {
-                    ModelState.AddModelError("", "Konto nie zostało aktywowane");
+                    ModelState.AddModelError("", "Konto o podanym mailu nie istnieje");
                 }
 
-
+                return View(loginVM);
             }
-            else
-            {
-                ModelState.AddModelError("", "Konto o podanym mailu nie istnieje");
-            }
-
-            return View(loginVM);
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         public IActionResult Logout()
         {
-            HttpContext.Session.Remove("role");
-            HttpContext.Session.Remove("firstName");
-            HttpContext.Session.Remove("lastName");
-            HttpContext.Session.Remove("userID");
-            return RedirectToAction("Index", "Home");
+            if (!_userService.CheckIfLoggedIn())
+            {
+                HttpContext.Session.Remove("role");
+                HttpContext.Session.Remove("firstName");
+                HttpContext.Session.Remove("lastName");
+                HttpContext.Session.Remove("userID");
+                return RedirectToAction("Index", "Home");
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         public IActionResult AccessDenied()
@@ -322,14 +322,22 @@ namespace Restauracja.Controllers
 
         public IActionResult ActivateOrDeactivateUser(int id)
         {
-            _userService.ActivateOrDeactivateUser(id);
-            return RedirectToAction("Index", "Users");
+            if (_userService.CheckIfAdmin())
+            {
+                _userService.ActivateOrDeactivateUser(id);
+                return RedirectToAction("Index", "Users");
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         public IActionResult ChangeRole(int id)
         {
-            _userService.ChangeRole(id);
-            return RedirectToAction("Index", "Users");
+            if (_userService.CheckIfAdmin())
+            {
+                _userService.ChangeRole(id);
+                return RedirectToAction("Index", "Users");
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
     }
 }

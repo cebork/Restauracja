@@ -7,50 +7,42 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Restauracja.Data;
 using Restauracja.Models;
+using Restauracja.Services;
 
 namespace Restauracja.Controllers
 {
     public class CategoriesController : Controller
     {
         private readonly RestauracjaContext _context;
-
-        public CategoriesController(RestauracjaContext context)
+        private readonly IUserService _userService;
+        public CategoriesController(RestauracjaContext context, IUserService userService)
         {
             _context = context;
+            _userService = userService;
         }
 
         // GET: Categories
         public async Task<IActionResult> Index()
         {
-            var categoriesAll = await _context.Category.ToListAsync();
-            List<Category> categoriesListNotDeleted = categoriesAll.Where(c => c.IsDeleted == false).ToList();
-            return _context.Category != null ?
-                        View(categoriesListNotDeleted) :
-                        Problem("Entity set 'RestauracjaContext.Category'  is null.");
-        }
-
-        // GET: Categories/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.Category == null)
+            if (_userService.CheckIfAdmin())
             {
-                return NotFound();
+                var categoriesAll = await _context.Category.ToListAsync();
+                List<Category> categoriesListNotDeleted = categoriesAll.Where(c => c.IsDeleted == false).ToList();
+                return _context.Category != null ?
+                            View(categoriesListNotDeleted) :
+                            Problem("Entity set 'RestauracjaContext.Category'  is null.");
             }
-
-            var category = await _context.Category
-                .FirstOrDefaultAsync(m => m.CategoryID == id);
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            return View(category);
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         // GET: Categories/Create
         public IActionResult Create()
         {
-            return View();
+            if (_userService.CheckIfAdmin())
+            {
+                return View();
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         // POST: Categories/Create
@@ -60,82 +52,39 @@ namespace Restauracja.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CategoryID,Name")] Category category)
         {
-            if (ModelState.IsValid)
+            if(_userService.CheckIfAdmin())
             {
-                _context.Add(category);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(category);
-        }
-
-        // GET: Categories/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _context.Category == null)
-            {
-                return NotFound();
-            }
-
-            var category = await _context.Category.FindAsync(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
-            return View(category);
-        }
-
-        // POST: Categories/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CategoryID,Name")] Category category)
-        {
-            if (id != category.CategoryID)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                if (ModelState.IsValid)
                 {
-                    _context.Update(category);
+                    _context.Add(category);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CategoryExists(category.CategoryID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                return View(category);
             }
-            return View(category);
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         // GET: Categories/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Category == null)
+            if (_userService.CheckIfAdmin())
             {
-                return NotFound();
-            }
+                if (id == null || _context.Category == null)
+                {
+                    return NotFound();
+                }
 
-            var category = await _context.Category
-                .FirstOrDefaultAsync(m => m.CategoryID == id);
-            if (category == null)
-            {
-                return NotFound();
-            }
+                var category = await _context.Category
+                    .FirstOrDefaultAsync(m => m.CategoryID == id);
+                if (category == null)
+                {
+                    return NotFound();
+                }
 
-            return View(category);
+                return View(category);
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         // POST: Categories/Delete/5
@@ -143,19 +92,23 @@ namespace Restauracja.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Category == null)
+            if (_userService.CheckIfAdmin())
             {
-                return Problem("Entity set 'RestauracjaContext.Category'  is null.");
-            }
-            var category = await _context.Category.FindAsync(id);
-            if (category != null)
-            {
-                category.IsDeleted = true;
-                _context.Category.Update(category);
-            }
+                if (_context.Category == null)
+                {
+                    return Problem("Entity set 'RestauracjaContext.Category'  is null.");
+                }
+                var category = await _context.Category.FindAsync(id);
+                if (category != null)
+                {
+                    category.IsDeleted = true;
+                    _context.Category.Update(category);
+                }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return RedirectToAction("AccessDenied", "Users");
         }
 
         private bool CategoryExists(int id)
