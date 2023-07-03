@@ -28,7 +28,7 @@ namespace Restauracja
             builder.Services.AddScoped<IDishService, DishService>();
             builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<IUserService, UserService>();
-
+            builder.Services.AddScoped<IOrderService, OrderService>();
 
             var app = builder.Build();
 

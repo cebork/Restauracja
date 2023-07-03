@@ -14,6 +14,7 @@ namespace Restauracja.Services
         Task<PaginationViewModel<User>> FillPaginationViewModelAsync(int page);
         void ActivateOrDeactivateUser(int userID);
         void ChangeRole(int userID);
+        int GetUserId();
     }
     public class UserService : IUserService
     {
@@ -97,6 +98,11 @@ namespace Restauracja.Services
                 _context.Update(user);
                 _context.SaveChanges();
             }
+        }
+
+        public int GetUserId()
+        {
+            return (int)_contextAccessor.HttpContext.Session.GetInt32("userID");
         }
     }
 }

@@ -1,0 +1,53 @@
+﻿@model IEnumerable<Restauracja.Models.OrderContent>
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<h1>Faktura dla zamówienia: @Model.First().OrderId</h1>
+<hr />
+<h2>Dane dostawcze</h2>
+<p>Imie: @Model.First().Order.User.FirstName</p>
+<p>Nazwisko: @Model.First().Order.User.LastName</p>
+<p>Numer telefonu: @Model.First().Order.User.PhoneNumber</p>
+<p>Adres: @Model.First().Order.User.Address</p>
+<p>Miasto: @Model.First().Order.User.City</p>
+<p>Kod pocztowy: @Model.First().Order.User.PostalCode</p>
+<hr />
+<h2>Zamówienie</h2>
+<table border="1">
+    <thead>
+        <th>Zdjęcie</th>
+        <th>Nazwa</th>
+        <th>Cena [PLN]</th>
+        <th>Ilość</th>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td style=" width: 25%">
+                    @if (!string.IsNullOrEmpty(item.Dish.Image))
+                    {
+                        <img style="width: 80%" src="data:image;base64,@Html.DisplayFor(modelItem => item.Dish.Image)" alt="@Html.DisplayFor(modelItem => item.Dish.Name)" />
+                    }
+                    else
+                    {
+                        <img style="width: 80%" src="~/static/Images/placeholder.jpg" alt="Brak zdjęcia" />
+                    }
+                </td>
+                <td style=" width: 25%">
+                    @Html.DisplayFor(modelItem => item.Dish.Name)
+                </td>
+                <td style=" width: 25%">
+                    @Html.DisplayFor(modelItem => item.Dish.Price)
+                </td>
+                <td style=" width: 25%">
+                    @Html.DisplayFor(modelItem => item.Amount)
+                </td>
+            </tr>
+        }
+        
+    </tbody>
+</table>
+<h2>Cena całkowita: @Model.First().Order.FullPrice PLN</h2>

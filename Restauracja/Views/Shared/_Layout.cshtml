@@ -40,7 +40,7 @@
                         @if(role == "Admin")
                         {
                             <li class="naav nav-item mask navi">
-                                <a class="nav-link text-white" aria-current="page" >Zamówienia - admin</a>
+                                <a class="nav-link text-white" aria-current="page" asp-area="" asp-controller="Orders" asp-action="IndexAdmin">Zamówienia - admin</a>
                             </li>
                             <li class="naav nav-item mask navi">
                                 <a class="nav-link text-white" aria-current="page" asp-area="" asp-controller="Ingredients" asp-action="Index">Składniki</a>
